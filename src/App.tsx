@@ -52,12 +52,12 @@ function Layout({ children }: { children: React.ReactNode }) {
             {CATEGORIES.slice(2).map((c) => (<Link key={c.slug} to={'/category/' + c.slug} className="hidden hover:underline md:inline">{c.name}</Link>))}
             <Link to="/about" className="hidden hover:underline md:inline">About</Link>
             <Link to="/contact" className="hidden hover:underline md:inline">Contact</Link>
-            <button type="button" aria-label="More links" aria-expanded={menuOpen} onClick={() => setMenuOpen((v) => !v)} className="px-2 py-1 text-xl leading-none text-[#0F2A44] hover:text-[#C8102E] md:hidden">⋯</button>
+            <button type="button" aria-label="More links" aria-expanded={menuOpen} onClick={() => setMenuOpen((v) => !v)} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#0F2A44] text-white shadow-md transition-colors hover:bg-[#C8102E] active:bg-[#C8102E] md:hidden"><svg width="20" height="6" viewBox="0 0 20 6" fill="none" aria-hidden="true"><circle cx="3" cy="3" r="2.5" fill="white" /><circle cx="10" cy="3" r="2.5" fill="white" /><circle cx="17" cy="3" r="2.5" fill="white" /></svg></button>
             {menuOpen && (
-              <div className="absolute right-0 top-full z-50 mt-2 w-56 rounded-lg border border-gray-200 bg-white shadow-lg md:hidden">
-                {CATEGORIES.slice(2).map((c) => (<Link key={c.slug} to={'/category/' + c.slug} onClick={() => setMenuOpen(false)} className="block px-4 py-3 text-[#0F2A44] hover:text-[#C8102E] hover:bg-gray-50">{c.name}</Link>))}
-                <Link to="/about" onClick={() => setMenuOpen(false)} className="block px-4 py-3 text-[#0F2A44] hover:text-[#C8102E] hover:bg-gray-50">About</Link>
-                <Link to="/contact" onClick={() => setMenuOpen(false)} className="block px-4 py-3 text-[#0F2A44] hover:text-[#C8102E] hover:bg-gray-50">Contact</Link>
+              <div className="absolute right-0 top-full z-50 mt-2 w-56 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl md:hidden">
+                {CATEGORIES.slice(2).map((c) => (<Link key={c.slug} to={'/category/' + c.slug} onClick={() => setMenuOpen(false)} className="block px-4 py-3 text-[#0F2A44] hover:text-[#C8102E] hover:bg-gray-50 hover:shadow-[inset_4px_0_0_0_#C8102E] active:text-[#C8102E] active:bg-gray-50 active:shadow-[inset_4px_0_0_0_#C8102E]">{c.name}</Link>))}
+                <Link to="/about" onClick={() => setMenuOpen(false)} className="block px-4 py-3 text-[#0F2A44] hover:text-[#C8102E] hover:bg-gray-50 hover:shadow-[inset_4px_0_0_0_#C8102E] active:text-[#C8102E] active:bg-gray-50 active:shadow-[inset_4px_0_0_0_#C8102E]">About</Link>
+                <Link to="/contact" onClick={() => setMenuOpen(false)} className="block px-4 py-3 text-[#0F2A44] hover:text-[#C8102E] hover:bg-gray-50 hover:shadow-[inset_4px_0_0_0_#C8102E] active:text-[#C8102E] active:bg-gray-50 active:shadow-[inset_4px_0_0_0_#C8102E]">Contact</Link>
               </div>
             )}
           </nav>
