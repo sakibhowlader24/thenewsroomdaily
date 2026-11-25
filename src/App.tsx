@@ -36,7 +36,7 @@ function Layout({ children }: { children: React.ReactNode }) {
       <header className="bg-white text-[#0F2A44]">
         <div className="max-w-5xl mx-auto px-4 py-3 flex flex-col items-start gap-2 md:flex-row md:flex-wrap md:items-center md:justify-between md:gap-3">
           <Link to="/" aria-label="The Newsroom Daily" className="inline-flex flex-col items-start leading-none"><span className="font-serif text-[1.75rem] md:text-[2.75rem] font-black tracking-tight text-[#0F2A44]">The Newsroom</span><span className="mt-1 flex w-full items-center justify-end gap-1.5 md:mt-1.5"><span className="text-base md:text-xl font-extrabold tracking-[0.35em] text-[#C8102E]">DAILY</span><span aria-hidden="true" className="inline-block h-2.5 w-3 shrink-0 bg-[#C8102E] md:h-3 md:w-[15px]" /></span></Link>
-          <nav className="flex flex-nowrap gap-5 overflow-x-auto whitespace-nowrap text-sm font-semibold -mx-4 px-4 md:mx-0 md:flex-wrap md:overflow-visible md:px-0 md:gap-4">
+          <nav className="w-full min-w-0 flex flex-nowrap gap-5 overflow-x-auto whitespace-nowrap text-sm font-semibold -mx-4 px-4 md:w-auto md:mx-0 md:flex-wrap md:overflow-visible md:px-0 md:gap-4">
             <Link to="/" className="hover:underline">Home</Link>
             {CATEGORIES.map((c) => (<Link key={c.slug} to={'/category/' + c.slug} className="hover:underline">{c.name}</Link>))}
             <Link to="/about" className="hover:underline">About</Link>
