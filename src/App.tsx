@@ -23,19 +23,19 @@ function ArticleCard({ a }: { a: Article }) {
   const cat = categoryBySlug(a.category)
   return (
     <article className="border rounded-lg p-5 bg-white shadow-sm">
-      <p className="text-xs font-bold uppercase tracking-wide text-red-700">{cat ? cat.name : a.category}</p>
+      <p className="text-xs font-bold uppercase tracking-wide text-[#C8102E]">{cat ? cat.name : a.category}</p>
       <h3 className="text-xl font-bold mt-2 leading-snug"><Link to={'/article/' + a.slug} className="hover:underline">{a.title}</Link></h3>
-      <p className="text-gray-600 mt-2">{a.excerpt}</p>
-      <p className="text-sm text-gray-500 mt-3">{a.date} | {a.author}</p>
+      <p className="text-[#6B7280] mt-2">{a.excerpt}</p>
+      <p className="text-sm text-[#6B7280] mt-3">{a.date} | {a.author}</p>
     </article>
   )
 }
 function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50 text-gray-900">
-      <header className="bg-gray-900 text-white">
+    <div className="min-h-screen flex flex-col bg-white text-[#1F2937]">
+      <header className="bg-white text-[#0F2A44] border-b-4 border-[#C8102E]">
         <div className="max-w-5xl mx-auto px-4 py-5 flex flex-wrap items-center justify-between gap-3">
-          <Link to="/" className="text-2xl font-black tracking-tight">{SITE_NAME}</Link>
+          <Link to="/" className="flex items-baseline gap-2"><span className="font-serif text-2xl font-black tracking-tight text-[#0F2A44]">The Newsroom</span><span className="text-sm font-extrabold tracking-[0.3em] text-[#C8102E]">DAILY</span></Link>
           <nav className="flex flex-wrap gap-4 text-sm font-semibold">
             <Link to="/" className="hover:underline">Home</Link>
             {CATEGORIES.map((c) => (<Link key={c.slug} to={'/category/' + c.slug} className="hover:underline">{c.name}</Link>))}
@@ -45,7 +45,7 @@ function Layout({ children }: { children: React.ReactNode }) {
         </div>
       </header>
       <main className="flex-1 max-w-5xl w-full mx-auto px-4 py-8">{children}</main>
-      <footer className="bg-gray-900 text-gray-300">
+      <footer className="bg-[#0F2A44] text-gray-300">
         <div className="max-w-5xl mx-auto px-4 py-8 text-sm flex flex-wrap gap-6 justify-between">
           <p>{SITE_NAME} | Clear, practical guides for everyday readers.</p>
           <p className="flex gap-4"><Link to="/about" className="hover:underline">About</Link><Link to="/contact" className="hover:underline">Contact</Link><Link to="/privacy" className="hover:underline">Privacy Policy</Link><Link to="/admin" className="hover:underline">Admin</Link></p>
@@ -62,11 +62,11 @@ function Home() {
     <div>
       {latest && (
         <section className="bg-white border rounded-lg p-6 shadow-sm mb-10">
-          <p className="text-xs font-bold uppercase tracking-wide text-red-700">Latest article</p>
+          <p className="text-xs font-bold uppercase tracking-wide text-[#C8102E]">Latest article</p>
           <h1 className="text-3xl md:text-4xl font-black mt-2 leading-tight"><Link to={'/article/' + latest.slug} className="hover:underline">{latest.title}</Link></h1>
-          <p className="text-gray-600 mt-3 text-lg">{latest.excerpt}</p>
-          <p className="text-sm text-gray-500 mt-3">{latest.date} | {latest.author}</p>
-          <Link to={'/article/' + latest.slug} className="inline-block mt-4 bg-red-700 text-white font-bold px-4 py-2 rounded">Read the guide</Link>
+          <p className="text-[#6B7280] mt-3 text-lg">{latest.excerpt}</p>
+          <p className="text-sm text-[#6B7280] mt-3">{latest.date} | {latest.author}</p>
+          <Link to={'/article/' + latest.slug} className="inline-block mt-4 bg-[#C8102E] text-white font-bold px-4 py-2 rounded">Read the guide</Link>
         </section>
       )}
       <h2 className="text-2xl font-bold mb-4">Latest articles</h2>
@@ -76,8 +76,8 @@ function Home() {
         return (
           <section key={c.slug} className="mb-10">
             <h2 className="text-2xl font-bold"><Link to={'/category/' + c.slug} className="hover:underline">{c.name}</Link></h2>
-            <p className="text-gray-600 mt-1 mb-4">{c.description}</p>
-            {list.length ? (<div className="grid md:grid-cols-2 gap-5">{list.map((a) => (<ArticleCard key={a.slug} a={a} />))}</div>) : (<p className="text-gray-600">More guides in this category are coming soon.</p>)}
+            <p className="text-[#6B7280] mt-1 mb-4">{c.description}</p>
+            {list.length ? (<div className="grid md:grid-cols-2 gap-5">{list.map((a) => (<ArticleCard key={a.slug} a={a} />))}</div>) : (<p className="text-[#6B7280]">More guides in this category are coming soon.</p>)}
           </section>
         )
       })}
@@ -89,20 +89,20 @@ function ArticlePage() {
   const articles = getLocalArticles()
   const a = articles.find((x) => x.slug === slug)
   useSeo(a ? a.title : 'Article not found', a ? a.description : 'This article could not be found.')
-  if (!a) return (<div><h1 className="text-3xl font-bold">Article not found</h1><p className="mt-3"><Link to="/" className="text-red-700 underline">Back to home</Link></p></div>)
+  if (!a) return (<div><h1 className="text-3xl font-bold">Article not found</h1><p className="mt-3"><Link to="/" className="text-[#C8102E] underline">Back to home</Link></p></div>)
   const cat = categoryBySlug(a.category)
   const related = articles.filter((x) => x.category === a.category && x.slug !== a.slug)
   return (
     <article>
-      <p className="text-xs font-bold uppercase tracking-wide text-red-700"><Link to={'/category/' + a.category} className="hover:underline">{cat ? cat.name : a.category}</Link></p>
+      <p className="text-xs font-bold uppercase tracking-wide text-[#C8102E]"><Link to={'/category/' + a.category} className="hover:underline">{cat ? cat.name : a.category}</Link></p>
       <h1 className="text-3xl md:text-4xl font-black mt-2 leading-tight">{a.title}</h1>
-      <p className="text-sm text-gray-500 mt-3">{a.date} | By {a.author}</p>
+      <p className="text-sm text-[#6B7280] mt-3">{a.date} | By {a.author}</p>
       <div className="mt-6 space-y-4 text-lg leading-relaxed bg-white border rounded-lg p-6 shadow-sm">
         {a.content.map((block, i) => block.startsWith('## ') ? (<h2 key={i} className="text-2xl font-bold pt-2">{block.slice(3)}</h2>) : (<p key={i}>{block}</p>))}
       </div>
-      <p className="text-sm text-gray-500 mt-4">Sources: official game and product pages, and general guidance from public help pages. Money and health articles are general education, not personal advice.</p>
+      <p className="text-sm text-[#6B7280] mt-4">Sources: official game and product pages, and general guidance from public help pages. Money and health articles are general education, not personal advice.</p>
       {related.length > 0 && (<section className="mt-10"><h2 className="text-2xl font-bold mb-4">Related articles</h2><div className="grid md:grid-cols-2 gap-5">{related.map((r) => (<ArticleCard key={r.slug} a={r} />))}</div></section>)}
-      <p className="mt-8"><Link to="/" className="text-red-700 underline">Back to home</Link></p>
+      <p className="mt-8"><Link to="/" className="text-[#C8102E] underline">Back to home</Link></p>
     </article>
   )
 }
@@ -110,13 +110,13 @@ function CategoryPage() {
   const { slug } = useParams()
   const cat = slug ? categoryBySlug(slug) : undefined
   useSeo(cat ? cat.name : 'Category not found', cat ? cat.description : 'This category could not be found.')
-  if (!cat) return (<div><h1 className="text-3xl font-bold">Category not found</h1><p className="mt-3"><Link to="/" className="text-red-700 underline">Back to home</Link></p></div>)
+  if (!cat) return (<div><h1 className="text-3xl font-bold">Category not found</h1><p className="mt-3"><Link to="/" className="text-[#C8102E] underline">Back to home</Link></p></div>)
   const list = getLocalArticles().filter((a) => a.category === cat.slug)
   return (
     <div>
       <h1 className="text-3xl font-bold">{cat.name}</h1>
-      <p className="text-gray-600 mt-2 mb-6">{cat.description}</p>
-      {list.length ? (<div className="grid md:grid-cols-2 gap-5">{list.map((a) => (<ArticleCard key={a.slug} a={a} />))}</div>) : (<p className="text-gray-600">More guides in this category are coming soon. Check back for new articles.</p>)}
+      <p className="text-[#6B7280] mt-2 mb-6">{cat.description}</p>
+      {list.length ? (<div className="grid md:grid-cols-2 gap-5">{list.map((a) => (<ArticleCard key={a.slug} a={a} />))}</div>) : (<p className="text-[#6B7280]">More guides in this category are coming soon. Check back for new articles.</p>)}
     </div>
   )
 }
@@ -141,13 +141,13 @@ function Contact() {
   return (
     <div className="bg-white border rounded-lg p-6 shadow-sm">
       <h1 className="text-3xl font-black">Contact</h1>
-      <p className="text-gray-600 mt-2 mb-6">Send a question, a correction, or a story idea. This form shows a confirmation on this page. Email contact will be added later.</p>
+      <p className="text-[#6B7280] mt-2 mb-6">Send a question, a correction, or a story idea. This form shows a confirmation on this page. Email contact will be added later.</p>
       {sent ? (<p className="bg-green-100 border border-green-300 rounded p-4">Thank you, {name || 'reader'}. Your message was noted on this page. We will add email delivery for this form soon.</p>) : (
         <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); setSent(true) }}>
           <label className="block">Name<input className="w-full border rounded px-3 py-2 mt-1" value={name} onChange={(e) => setName(e.target.value)} required /></label>
           <label className="block">Email<input type="email" className="w-full border rounded px-3 py-2 mt-1" value={email} onChange={(e) => setEmail(e.target.value)} required /></label>
           <label className="block">Message<textarea className="w-full border rounded px-3 py-2 mt-1" rows={5} value={message} onChange={(e) => setMessage(e.target.value)} required /></label>
-          <button type="submit" className="bg-red-700 text-white font-bold px-4 py-2 rounded">Send message</button>
+          <button type="submit" className="bg-[#C8102E] text-white font-bold px-4 py-2 rounded">Send message</button>
         </form>
       )}
     </div>
@@ -187,7 +187,7 @@ function Admin() {
   return (
     <div>
       <h1 className="text-3xl font-black">Admin</h1>
-      <p className="text-gray-600 mt-2">Add and edit articles. Articles are saved in this browser for now. Supabase status: {supabaseConfigured ? 'connected' : 'pending, Supabase env vars are not set yet. When they are set, articles will sync to the Supabase articles table.'}</p>
+      <p className="text-[#6B7280] mt-2">Add and edit articles. Articles are saved in this browser for now. Supabase status: {supabaseConfigured ? 'connected' : 'pending, Supabase env vars are not set yet. When they are set, articles will sync to the Supabase articles table.'}</p>
       {saved && <p className="bg-green-100 border border-green-300 rounded p-3 mt-4">{saved}</p>}
       <form onSubmit={submit} className="bg-white border rounded-lg p-6 shadow-sm space-y-4 mt-6">
         <label className="block">Title<input className="w-full border rounded px-3 py-2 mt-1" value={title} onChange={(e) => setTitle(e.target.value)} required /></label>
@@ -195,10 +195,10 @@ function Admin() {
         <label className="block">Category<select className="w-full border rounded px-3 py-2 mt-1" value={category} onChange={(e) => setCategory(e.target.value)}>{CATEGORIES.map((c) => (<option key={c.slug} value={c.slug}>{c.name}</option>))}</select></label>
         <label className="block">Excerpt and meta description<textarea className="w-full border rounded px-3 py-2 mt-1" rows={2} value={excerpt} onChange={(e) => setExcerpt(e.target.value)} required /></label>
         <label className="block">Content, paragraphs separated by a blank line, subheadings start with ## <textarea className="w-full border rounded px-3 py-2 mt-1" rows={8} value={body} onChange={(e) => setBody(e.target.value)} required /></label>
-        <button type="submit" className="bg-red-700 text-white font-bold px-4 py-2 rounded">{editing ? 'Save changes' : 'Add article'}</button>
+        <button type="submit" className="bg-[#C8102E] text-white font-bold px-4 py-2 rounded">{editing ? 'Save changes' : 'Add article'}</button>
       </form>
       <h2 className="text-2xl font-bold mt-8 mb-4">Articles ({articles.length})</h2>
-      <ul className="space-y-3">{articles.map((a) => (<li key={a.slug} className="bg-white border rounded p-4 flex flex-wrap justify-between gap-3"><span><Link to={'/article/' + a.slug} className="font-bold hover:underline">{a.title}</Link><span className="text-gray-500 text-sm block">{a.category} | {a.slug}</span></span><span className="flex gap-3"><button className="text-red-700 underline" onClick={() => startEdit(a)}>Edit</button><button className="text-red-700 underline" onClick={() => save(articles.filter((x) => x.slug !== a.slug))}>Delete</button></span></li>))}</ul>
+      <ul className="space-y-3">{articles.map((a) => (<li key={a.slug} className="bg-white border rounded p-4 flex flex-wrap justify-between gap-3"><span><Link to={'/article/' + a.slug} className="font-bold hover:underline">{a.title}</Link><span className="text-[#6B7280] text-sm block">{a.category} | {a.slug}</span></span><span className="flex gap-3"><button className="text-[#C8102E] underline" onClick={() => startEdit(a)}>Edit</button><button className="text-[#C8102E] underline" onClick={() => save(articles.filter((x) => x.slug !== a.slug))}>Delete</button></span></li>))}</ul>
     </div>
   )
 }

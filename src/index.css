@@ -1,4 +1,12 @@
 @import "tailwindcss";
-
-body { background: #ffffff; color: #111827; }
+@theme {
+  --font-serif: "Playfair Display", Merriweather, Georgia, "Times New Roman", serif;
+  --font-sans: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --color-navy: #0F2A44;
+  --color-accent: #C8102E;
+  --color-ink: #1F2937;
+  --color-muted: #6B7280;
+}
+body { background: #ffffff; color: #1F2937; font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif; }
+h1, h2, h3 { font-family: "Playfair Display", Merriweather, Georgia, "Times New Roman", serif; color: #0F2A44; }
 a { color: inherit; }
