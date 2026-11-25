@@ -34,8 +34,8 @@ function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col bg-white text-[#1F2937]">
       <header className="bg-white text-[#0F2A44]">
-        <div className="max-w-5xl mx-auto px-4 py-5 flex flex-wrap items-center justify-between gap-3">
-          <Link to="/" className="flex items-baseline gap-3"><span className="font-serif text-3xl md:text-4xl font-black tracking-tight text-[#0F2A44]">The Newsroom</span><span className="text-base md:text-lg font-extrabold tracking-[0.35em] text-[#C8102E]">DAILY</span><span aria-hidden="true" className="inline-block h-3 w-3 shrink-0 self-center bg-[#C8102E]" /></Link>
+        <div className="max-w-5xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+          <Link to="/" aria-label="The Newsroom Daily" className="inline-flex flex-col items-start leading-none"><span className="font-serif text-4xl md:text-[2.75rem] font-black tracking-tight text-[#0F2A44]">The Newsroom</span><span className="mt-1.5 flex w-full items-center justify-end gap-1.5"><span className="text-xl font-extrabold tracking-[0.35em] text-[#C8102E]">DAILY</span><span aria-hidden="true" className="inline-block h-3 w-[15px] shrink-0 bg-[#C8102E]" /></span></Link>
           <nav className="flex flex-wrap gap-4 text-sm font-semibold">
             <Link to="/" className="hover:underline">Home</Link>
             {CATEGORIES.map((c) => (<Link key={c.slug} to={'/category/' + c.slug} className="hover:underline">{c.name}</Link>))}
@@ -43,7 +43,7 @@ function Layout({ children }: { children: React.ReactNode }) {
             <Link to="/contact" className="hover:underline">Contact</Link>
           </nav>
         </div>
-        <div aria-hidden="true" className="h-[2px] w-full bg-[#C8102E]" />
+        <div aria-hidden="true" className="h-[3px] w-full bg-[#C8102E]" />
       </header>
       <main className="flex-1 max-w-5xl w-full mx-auto px-4 py-8">{children}</main>
       <footer className="bg-[#0F2A44] text-gray-300">
