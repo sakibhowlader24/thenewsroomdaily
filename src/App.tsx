@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { BrowserRouter, Routes, Route, Link, useParams, Navigate } from 'react-router-dom'
 import { ARTICLES, type Article } from './data/articles'
 import { CATEGORIES, SITE_NAME, SITE_URL, categoryBySlug } from './data/site'
@@ -31,16 +31,35 @@ function ArticleCard({ a }: { a: Article }) {
   )
 }
 function Layout({ children }: { children: React.ReactNode }) {
+  const [menuOpen, setMenuOpen] = useState(false)
+  const menuRef = useRef<HTMLElement | null>(null)
+  useEffect(() => {
+    if (!menuOpen) return
+    const onDown = (e: MouseEvent) => { if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false) }
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setMenuOpen(false) }
+    document.addEventListener('mousedown', onDown)
+    document.addEventListener('keydown', onKey)
+    return () => { document.removeEventListener('mousedown', onDown); document.removeEventListener('keydown', onKey) }
+  }, [menuOpen])
   return (
     <div className="min-h-screen flex flex-col bg-white text-[#1F2937]">
       <header className="bg-white text-[#0F2A44]">
         <div className="max-w-5xl mx-auto px-4 py-3 flex flex-col items-start gap-2 md:flex-row md:flex-wrap md:items-center md:justify-between md:gap-3">
           <Link to="/" aria-label="The Newsroom Daily" className="inline-flex flex-col items-start leading-none"><span className="font-serif text-[1.75rem] md:text-[2.75rem] font-black tracking-tight text-[#0F2A44]">The Newsroom</span><span className="mt-1 flex w-full items-center justify-end gap-1.5 md:mt-1.5"><span className="text-base md:text-xl font-extrabold tracking-[0.35em] text-[#C8102E]">DAILY</span><span aria-hidden="true" className="inline-block h-2.5 w-3 shrink-0 bg-[#C8102E] md:h-3 md:w-[15px]" /></span></Link>
-          <nav className="w-[calc(100%+2rem)] min-w-0 flex flex-nowrap gap-5 overflow-x-auto whitespace-nowrap text-sm font-semibold -mx-4 px-4 md:w-auto md:mx-0 md:flex-wrap md:overflow-visible md:px-0 md:gap-4">
+          <nav ref={menuRef} className="relative w-[calc(100%+2rem)] min-w-0 flex items-center gap-5 whitespace-nowrap text-sm font-semibold -mx-4 px-4 md:w-auto md:mx-0 md:flex-wrap md:gap-4">
             <Link to="/" className="hover:underline">Home</Link>
-            {CATEGORIES.map((c) => (<Link key={c.slug} to={'/category/' + c.slug} className="hover:underline">{c.name}</Link>))}
-            <Link to="/about" className="hover:underline">About</Link>
-            <Link to="/contact" className="hover:underline">Contact</Link>
+            {CATEGORIES.slice(0, 2).map((c) => (<Link key={c.slug} to={'/category/' + c.slug} className="hover:underline">{c.name}</Link>))}
+            {CATEGORIES.slice(2).map((c) => (<Link key={c.slug} to={'/category/' + c.slug} className="hidden hover:underline md:inline">{c.name}</Link>))}
+            <Link to="/about" className="hidden hover:underline md:inline">About</Link>
+            <Link to="/contact" className="hidden hover:underline md:inline">Contact</Link>
+            <button type="button" aria-label="More links" aria-expanded={menuOpen} onClick={() => setMenuOpen((v) => !v)} className="px-2 py-1 text-xl leading-none text-[#0F2A44] hover:text-[#C8102E] md:hidden">⋯</button>
+            {menuOpen && (
+              <div className="absolute right-0 top-full z-50 mt-2 w-56 rounded-lg border border-gray-200 bg-white shadow-lg md:hidden">
+                {CATEGORIES.slice(2).map((c) => (<Link key={c.slug} to={'/category/' + c.slug} onClick={() => setMenuOpen(false)} className="block px-4 py-3 text-[#0F2A44] hover:text-[#C8102E] hover:bg-gray-50">{c.name}</Link>))}
+                <Link to="/about" onClick={() => setMenuOpen(false)} className="block px-4 py-3 text-[#0F2A44] hover:text-[#C8102E] hover:bg-gray-50">About</Link>
+                <Link to="/contact" onClick={() => setMenuOpen(false)} className="block px-4 py-3 text-[#0F2A44] hover:text-[#C8102E] hover:bg-gray-50">Contact</Link>
+              </div>
+            )}
           </nav>
         </div>
         <div aria-hidden="true" className="h-[3px] w-full bg-[#C8102E]" />
