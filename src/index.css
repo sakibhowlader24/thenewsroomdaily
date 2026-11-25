@@ -10,3 +10,9 @@
 body { background: #ffffff; color: #1F2937; font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif; }
 h1, h2, h3 { font-family: "Playfair Display", Merriweather, Georgia, "Times New Roman", serif; color: #0F2A44; }
 a { color: inherit; }
+
+@media (max-width: 767px) {
+  header nav { scrollbar-width: none; }
+  header nav::-webkit-scrollbar { display: none; }
+  header nav a { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+}
