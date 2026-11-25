@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
-import { BrowserRouter, Routes, Route, Link, useParams, Navigate } from 'react-router-dom'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { BrowserRouter, Routes, Route, Link, useParams, Navigate, useSearchParams } from 'react-router-dom'
 import { ARTICLES, type Article } from './data/articles'
 import { CATEGORIES, SITE_NAME, SITE_URL, categoryBySlug } from './data/site'
-import { supabaseConfigured } from './lib/supabase'
+import { supabase, supabaseConfigured, fetchPublishedArticles, fetchAllArticles, rowToArticle, articleToRow, type ArticleRow } from './lib/supabase'
 
 function useSeo(title: string, description: string) {
   useEffect(() => {
@@ -15,9 +15,14 @@ function useSeo(title: string, description: string) {
     setOg('og:type', 'article')
   }, [title, description])
 }
-function getLocalArticles(): Article[] {
-  try { const raw = localStorage.getItem('tnd-articles'); if (raw) return JSON.parse(raw) as Article[] } catch { /* ignore */ }
-  return ARTICLES
+function useArticles(): Article[] {
+  const [articles, setArticles] = useState<Article[]>(ARTICLES)
+  useEffect(() => {
+    let live = true
+    fetchPublishedArticles().then((list) => { if (live) setArticles(list) })
+    return () => { live = false }
+  }, [])
+  return articles
 }
 function ArticleCard({ a }: { a: Article }) {
   const cat = categoryBySlug(a.category)
@@ -76,7 +81,7 @@ function Layout({ children }: { children: React.ReactNode }) {
 }
 function Home() {
   useSeo('Home', 'Clear, practical guides on GTA 6 gaming, tech how-to, money and finance, career and work, and everyday life.')
-  const articles = getLocalArticles()
+  const articles = useArticles()
   const latest = articles[0]
   return (
     <div>
@@ -106,7 +111,7 @@ function Home() {
 }
 function ArticlePage() {
   const { slug } = useParams()
-  const articles = getLocalArticles()
+  const articles = useArticles()
   const a = articles.find((x) => x.slug === slug)
   useSeo(a ? a.title : 'Article not found', a ? a.description : 'This article could not be found.')
   if (!a) return (<div><h1 className="text-3xl font-bold">Article not found</h1><p className="mt-3"><Link to="/" className="text-[#C8102E] underline">Back to home</Link></p></div>)
@@ -131,7 +136,8 @@ function CategoryPage() {
   const cat = slug ? categoryBySlug(slug) : undefined
   useSeo(cat ? cat.name : 'Category not found', cat ? cat.description : 'This category could not be found.')
   if (!cat) return (<div><h1 className="text-3xl font-bold">Category not found</h1><p className="mt-3"><Link to="/" className="text-[#C8102E] underline">Back to home</Link></p></div>)
-  const list = getLocalArticles().filter((a) => a.category === cat.slug)
+  const articles = useArticles()
+  const list = articles.filter((a) => a.category === cat.slug)
   return (
     <div>
       <h1 className="text-3xl font-bold">{cat.name}</h1>
@@ -153,26 +159,40 @@ function About() {
   )
 }
 function Contact() {
-  useSeo('Contact', 'Contact The Newsroom Daily with a question, a correction, or a story idea.')
-  const [sent, setSent] = useState(false)
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [message, setMessage] = useState('')
+  useSeo('Contact', 'Contact The Newsroom Daily: send a question, a correction, or a story idea.')
+  const [params] = useSearchParams()
+  const sent = params.get('sent') === '1'
   return (
-    <div className="bg-white border rounded-lg p-6 shadow-sm">
+    <div>
       <h1 className="text-3xl font-black">Contact</h1>
-      <p className="text-[#6B7280] mt-2 mb-6">Send a question, a correction, or a story idea. This form shows a confirmation on this page. Email contact will be added later.</p>
-      {sent ? (<p className="bg-green-100 border border-green-300 rounded p-4">Thank you, {name || 'reader'}. Your message was noted on this page. We will add email delivery for this form soon.</p>) : (
-        <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); setSent(true) }}>
-          <label className="block">Name<input className="w-full border rounded px-3 py-2 mt-1" value={name} onChange={(e) => setName(e.target.value)} required /></label>
-          <label className="block">Email<input type="email" className="w-full border rounded px-3 py-2 mt-1" value={email} onChange={(e) => setEmail(e.target.value)} required /></label>
-          <label className="block">Message<textarea className="w-full border rounded px-3 py-2 mt-1" rows={5} value={message} onChange={(e) => setMessage(e.target.value)} required /></label>
-          <button type="submit" className="bg-[#C8102E] text-white font-bold px-4 py-2 rounded">Send message</button>
+      <p className="text-[#6B7280] mt-2">Send a question, a correction, or a story idea. We read every message and reply by email when an answer is needed.</p>
+      {sent ? (
+        <p className="bg-green-100 border border-green-300 rounded p-4 mt-4">Thank you. Your message was sent. We will reply by email when an answer is needed.</p>
+      ) : (
+        <form className="space-y-4 mt-4" action="https://formsubmit.co/rtvsakib@gmail.com" method="POST">
+          <input type="hidden" name="_subject" value="New contact message - The Newsroom Daily" />
+          <input type="hidden" name="_captcha" value="false" />
+          <input type="hidden" name="_template" value="table" />
+          <input type="hidden" name="_next" value={SITE_URL + '/contact?sent=1'} />
+          <div>
+            <label className="block font-bold mb-1">Name</label>
+            <input name="name" required className="w-full border rounded p-3" />
+          </div>
+          <div>
+            <label className="block font-bold mb-1">Email</label>
+            <input name="email" type="email" required className="w-full border rounded p-3" />
+          </div>
+          <div>
+            <label className="block font-bold mb-1">Message</label>
+            <textarea name="message" required rows={5} className="w-full border rounded p-3" />
+          </div>
+          <button className="bg-[#C8102E] text-white font-bold px-5 py-3 rounded hover:bg-[#A50D26]">Send message</button>
         </form>
       )}
     </div>
   )
 }
+
 function Privacy() {
   useSeo('Privacy Policy', 'Privacy Policy for The Newsroom Daily: what we collect, how we use it, and how to contact us.')
   return (
@@ -187,41 +207,220 @@ function Privacy() {
   )
 }
 function Admin() {
-  useSeo('Admin', 'Admin page for The Newsroom Daily: add and edit articles stored locally until Supabase is connected.')
-  const [articles, setArticles] = useState<Article[]>(getLocalArticles())
+  useSeo('Admin', 'Admin page for The Newsroom Daily: add and edit articles in Supabase.')
+  const [user, setUser] = useState<string | null>(null)
+  const [authChecked, setAuthChecked] = useState(false)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [authError, setAuthError] = useState('')
+  const [rows, setRows] = useState<ArticleRow[]>([])
+  const [loading, setLoading] = useState(false)
   const [title, setTitle] = useState('')
   const [slug, setSlug] = useState('')
   const [category, setCategory] = useState('gaming')
   const [excerpt, setExcerpt] = useState('')
+  const [meta, setMeta] = useState('')
   const [body, setBody] = useState('')
-  const [editing, setEditing] = useState('')
+  const [cover, setCover] = useState('')
+  const [pubDate, setPubDate] = useState(() => new Date().toISOString().slice(0, 10))
+  const [status, setStatus] = useState('published')
+  const [editingId, setEditingId] = useState<number | null>(null)
   const [saved, setSaved] = useState('')
-  const save = (list: Article[]) => { setArticles(list); localStorage.setItem('tnd-articles', JSON.stringify(list)); setSaved('Saved locally at ' + new Date().toLocaleTimeString()) }
-  const startEdit = (a: Article) => { setEditing(a.slug); setTitle(a.title); setSlug(a.slug); setCategory(a.category); setExcerpt(a.excerpt); setBody(a.content.join('\n\n')) }
-  const submit = (e: React.FormEvent) => {
+  const [formError, setFormError] = useState('')
+  useEffect(() => {
+    if (!supabase) { setAuthChecked(true); return }
+    supabase.auth.getSession().then(({ data }) => {
+      setUser(data.session?.user?.email || null)
+      setAuthChecked(true)
+    })
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user?.email || null)
+    })
+    return () => { listener.subscription.unsubscribe() }
+  }, [])
+  const load = async () => {
+    setLoading(true)
+    const list = await fetchAllArticles()
+    setRows(list)
+    setLoading(false)
+  }
+  useEffect(() => { if (user) load() }, [user])
+  const signIn = async (e: FormEvent) => {
     e.preventDefault()
-    const item: Article = { slug: slug.trim(), title: title.trim(), description: excerpt.trim(), category, date: '2026-11-25', author: SITE_NAME, excerpt: excerpt.trim(), content: body.split(/\n\s*\n/).filter(Boolean) }
-    const list = editing ? articles.map((a) => (a.slug === editing ? item : a)) : [...articles, item]
-    save(list); setEditing(''); setTitle(''); setSlug(''); setExcerpt(''); setBody('')
+    setAuthError('')
+    if (!supabase) { setAuthError('Supabase is not configured.'); return }
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    if (error) setAuthError(error.message)
+  }
+  const signOut = async () => {
+    if (supabase) await supabase.auth.signOut()
+    setUser(null)
+  }
+  const resetForm = () => {
+    setEditingId(null)
+    setTitle('')
+    setSlug('')
+    setCategory('gaming')
+    setExcerpt('')
+    setMeta('')
+    setBody('')
+    setCover('')
+    setPubDate(new Date().toISOString().slice(0, 10))
+    setStatus('published')
+  }
+  const startEdit = (row: ArticleRow) => {
+    const a = rowToArticle(row)
+    setEditingId(row.id)
+    setTitle(a.title)
+    setSlug(a.slug)
+    setCategory(a.category)
+    setExcerpt(a.excerpt)
+    setMeta(a.description)
+    setBody(a.content.join('\n\n'))
+    setCover(a.cover || '')
+    setPubDate(a.date || new Date().toISOString().slice(0, 10))
+    setStatus(a.status || 'published')
+  }
+  const submit = async (e: FormEvent) => {
+    e.preventDefault()
+    setFormError('')
+    setSaved('')
+    if (!supabase) { setFormError('Supabase is not configured.'); return }
+    const item: Article = {
+      slug: slug.trim(),
+      title: title.trim(),
+      description: meta.trim() || excerpt.trim(),
+      category,
+      date: pubDate,
+      author: SITE_NAME,
+      excerpt: excerpt.trim(),
+      content: body.split(/\n\s*\n/).filter(Boolean),
+      cover: cover.trim() || undefined,
+      status,
+    }
+    const row = articleToRow(item)
+    const { error } = editingId
+      ? await supabase.from('articles').update(row).eq('id', editingId)
+      : await supabase.from('articles').insert(row)
+    if (error) { setFormError(error.message); return }
+    setSaved('Saved to Supabase at ' + new Date().toLocaleTimeString())
+    resetForm()
+    load()
+  }
+  const remove = async (id: number) => {
+    if (!supabase) return
+    const { error } = await supabase.from('articles').delete().eq('id', id)
+    if (error) { setFormError(error.message); return }
+    setSaved('Deleted from Supabase at ' + new Date().toLocaleTimeString())
+    load()
+  }
+  if (!supabaseConfigured) {
+    return (<div><h1 className="text-3xl font-black">Admin</h1><p className="text-[#6B7280] mt-2">Supabase is not configured. Set the Supabase env vars in Vercel to use the admin.</p></div>)
+  }
+  if (!authChecked) {
+    return (<div><h1 className="text-3xl font-black">Admin</h1><p className="text-[#6B7280] mt-2">Checking sign-in status.</p></div>)
+  }
+  if (!user) {
+    return (
+      <div>
+        <h1 className="text-3xl font-black">Admin</h1>
+        <p className="text-[#6B7280] mt-2">Sign in to manage articles.</p>
+        <form className="space-y-4 mt-4" onSubmit={signIn}>
+          <div>
+            <label className="block font-bold mb-1">Email</label>
+            <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full border rounded p-3" />
+          </div>
+          <div>
+            <label className="block font-bold mb-1">Password</label>
+            <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className="w-full border rounded p-3" />
+          </div>
+          {authError && <p className="bg-red-100 border border-red-300 rounded p-3">{authError}</p>}
+          <button className="bg-[#C8102E] text-white font-bold px-5 py-3 rounded hover:bg-[#A50D26]">Sign in</button>
+        </form>
+      </div>
+    )
   }
   return (
     <div>
-      <h1 className="text-3xl font-black">Admin</h1>
-      <p className="text-[#6B7280] mt-2">Add and edit articles. Articles are saved in this browser for now. Supabase status: {supabaseConfigured ? 'connected' : 'pending, Supabase env vars are not set yet. When they are set, articles will sync to the Supabase articles table.'}</p>
+      <div className="flex flex-wrap justify-between gap-3 items-center">
+        <h1 className="text-3xl font-black">Admin</h1>
+        <span className="flex gap-3 items-center">
+          <span className="text-[#6B7280] text-sm">Signed in as {user}</span>
+          <button className="text-[#C8102E] underline" onClick={signOut}>Log out</button>
+        </span>
+      </div>
+      <p className="text-[#6B7280] mt-2">Add and edit articles. Articles are saved to the Supabase articles table. Supabase status: connected.</p>
       {saved && <p className="bg-green-100 border border-green-300 rounded p-3 mt-4">{saved}</p>}
-      <form onSubmit={submit} className="bg-white border rounded-lg p-6 shadow-sm space-y-4 mt-6">
-        <label className="block">Title<input className="w-full border rounded px-3 py-2 mt-1" value={title} onChange={(e) => setTitle(e.target.value)} required /></label>
-        <label className="block">Slug<input className="w-full border rounded px-3 py-2 mt-1" value={slug} onChange={(e) => setSlug(e.target.value)} required /></label>
-        <label className="block">Category<select className="w-full border rounded px-3 py-2 mt-1" value={category} onChange={(e) => setCategory(e.target.value)}>{CATEGORIES.map((c) => (<option key={c.slug} value={c.slug}>{c.name}</option>))}</select></label>
-        <label className="block">Excerpt and meta description<textarea className="w-full border rounded px-3 py-2 mt-1" rows={2} value={excerpt} onChange={(e) => setExcerpt(e.target.value)} required /></label>
-        <label className="block">Content, paragraphs separated by a blank line, subheadings start with ## <textarea className="w-full border rounded px-3 py-2 mt-1" rows={8} value={body} onChange={(e) => setBody(e.target.value)} required /></label>
-        <button type="submit" className="bg-[#C8102E] text-white font-bold px-4 py-2 rounded">{editing ? 'Save changes' : 'Add article'}</button>
+      {formError && <p className="bg-red-100 border border-red-300 rounded p-3 mt-4">{formError}</p>}
+      <form className="space-y-4 mt-4" onSubmit={submit}>
+        <div>
+          <label className="block font-bold mb-1">Title</label>
+          <input required value={title} onChange={(e) => setTitle(e.target.value)} className="w-full border rounded p-3" />
+        </div>
+        <div>
+          <label className="block font-bold mb-1">Slug</label>
+          <input required value={slug} onChange={(e) => setSlug(e.target.value)} className="w-full border rounded p-3" />
+        </div>
+        <div>
+          <label className="block font-bold mb-1">Category</label>
+          <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full border rounded p-3">
+            {CATEGORIES.map((c) => (<option key={c.slug} value={c.slug}>{c.name}</option>))}
+          </select>
+        </div>
+        <div>
+          <label className="block font-bold mb-1">Status</label>
+          <select value={status} onChange={(e) => setStatus(e.target.value)} className="w-full border rounded p-3">
+            <option value="published">Published</option>
+            <option value="draft">Draft</option>
+          </select>
+        </div>
+        <div>
+          <label className="block font-bold mb-1">Excerpt</label>
+          <textarea rows={2} value={excerpt} onChange={(e) => setExcerpt(e.target.value)} className="w-full border rounded p-3" />
+        </div>
+        <div>
+          <label className="block font-bold mb-1">Meta description</label>
+          <textarea rows={2} value={meta} onChange={(e) => setMeta(e.target.value)} className="w-full border rounded p-3" />
+        </div>
+        <div>
+          <label className="block font-bold mb-1">Cover image URL (optional)</label>
+          <input value={cover} onChange={(e) => setCover(e.target.value)} className="w-full border rounded p-3" />
+        </div>
+        <div>
+          <label className="block font-bold mb-1">Published date</label>
+          <input type="date" value={pubDate} onChange={(e) => setPubDate(e.target.value)} className="w-full border rounded p-3" />
+        </div>
+        <div>
+          <label className="block font-bold mb-1">Content (paragraphs separated by a blank line, subheadings start with ##)</label>
+          <textarea rows={8} value={body} onChange={(e) => setBody(e.target.value)} className="w-full border rounded p-3" />
+        </div>
+        <button className="bg-[#C8102E] text-white font-bold px-5 py-3 rounded hover:bg-[#A50D26]">{editingId ? 'Save changes' : 'Add article'}</button>
+        {editingId ? (<button type="button" className="ml-3 underline text-[#C8102E]" onClick={resetForm}>Cancel edit</button>) : null}
       </form>
-      <h2 className="text-2xl font-bold mt-8 mb-4">Articles ({articles.length})</h2>
-      <ul className="space-y-3">{articles.map((a) => (<li key={a.slug} className="bg-white border rounded p-4 flex flex-wrap justify-between gap-3"><span><Link to={'/article/' + a.slug} className="font-bold hover:underline">{a.title}</Link><span className="text-[#6B7280] text-sm block">{a.category} | {a.slug}</span></span><span className="flex gap-3"><button className="text-[#C8102E] underline" onClick={() => startEdit(a)}>Edit</button><button className="text-[#C8102E] underline" onClick={() => save(articles.filter((x) => x.slug !== a.slug))}>Delete</button></span></li>))}</ul>
+      <h2 className="text-2xl font-black mt-8">Articles ({rows.length})</h2>
+      {loading ? <p className="text-[#6B7280] mt-2">Loading articles.</p> : (
+        <ul className="space-y-3 mt-4">
+          {rows.map((row) => {
+            const a = rowToArticle(row)
+            return (
+              <li key={row.id} className="bg-white border rounded p-4 flex flex-wrap justify-between gap-3">
+                <span>
+                  <Link to={'/article/' + a.slug} className="font-bold hover:underline">{a.title}</Link>
+                  <span className="text-[#6B7280] text-sm block">{a.category} | {a.slug} | {a.status || 'published'}</span>
+                </span>
+                <span className="flex gap-3">
+                  <button className="text-[#C8102E] underline" onClick={() => startEdit(row)}>Edit</button>
+                  <button className="text-[#C8102E] underline" onClick={() => remove(row.id)}>Delete</button>
+                </span>
+              </li>
+            )
+          })}
+        </ul>
+      )}
     </div>
   )
 }
+
 export default function App() {
   return (
     <BrowserRouter>

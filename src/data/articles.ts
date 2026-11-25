@@ -1,4 +1,4 @@
-export interface Article { slug: string; title: string; description: string; category: string; date: string; author: string; excerpt: string; content: string[] }
+export interface Article { slug: string; title: string; description: string; category: string; date: string; author: string; excerpt: string; content: string[]; cover?: string; status?: string }
 export const ARTICLES: Article[] = [
   {
     slug: 'how-to-make-money-fast-in-gta-6',
