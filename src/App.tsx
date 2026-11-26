@@ -234,7 +234,7 @@ const [authError, setAuthError] = useState(''); const [isRecovery, setIsRecovery
       setAuthChecked(true)
     })
     if (window.location.hash.includes('type=recovery') || window.location.search.includes('type=recovery')) setIsRecovery(true); const { data: listener } = supabase.auth.onAuthStateChange((event, session) => { setUser(session?.user?.email || null); if (event === 'PASSWORD_RECOVERY') setIsRecovery(true) })
-      setUser(session?.user?.email || null); if (event === 'PASSWORD_RECOVERY') setIsRecovery(true) }); return () => { listener.subscription.unsubscribe() }
+      return () => { listener.subscription.unsubscribe() }
   }, [])
   const load = async () => {
     setLoading(true)
