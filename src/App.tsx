@@ -212,7 +212,7 @@ function Admin() {
   const [authChecked, setAuthChecked] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [authError, setAuthError] = useState('')
+const [authError, setAuthError] = useState(''); const [isRecovery, setIsRecovery] = useState(false); const [resetSent, setResetSent] = useState(''); const [resetError, setResetError] = useState(''); const [newPassword, setNewPassword] = useState(''); const [confirmPassword, setConfirmPassword] = useState(''); const [resetPasswordError, setResetPasswordError] = useState(''); const [resetPasswordDone, setResetPasswordDone] = useState('')
   const [rows, setRows] = useState<ArticleRow[]>([])
   const [loading, setLoading] = useState(false)
   const [title, setTitle] = useState('')
@@ -233,10 +233,8 @@ function Admin() {
       setUser(data.session?.user?.email || null)
       setAuthChecked(true)
     })
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user?.email || null)
-    })
-    return () => { listener.subscription.unsubscribe() }
+    if (window.location.hash.includes('type=recovery') || window.location.search.includes('type=recovery')) setIsRecovery(true); const { data: listener } = supabase.auth.onAuthStateChange((event, session) => { setUser(session?.user?.email || null); if (event === 'PASSWORD_RECOVERY') setIsRecovery(true) })
+      setUser(session?.user?.email || null); if (event === 'PASSWORD_RECOVERY') setIsRecovery(true) }); return () => { listener.subscription.unsubscribe() }
   }, [])
   const load = async () => {
     setLoading(true)
@@ -252,7 +250,7 @@ function Admin() {
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) setAuthError(error.message)
   }
-  const signOut = async () => {
+  const sendResetEmail = async () => { setResetError(''); setResetSent(''); if (!supabase) { setResetError('Supabase is not configured.'); return }; const { error } = await supabase.auth.resetPasswordForEmail('rtvsakib@gmail.com', { redirectTo: 'https://thenewsroomdaily.vercel.app/admin' }); if (error) setResetError(error.message); else setResetSent('পাসওয়ার্ড রিসেটের লিংক rtvsakib@gmail.com-এ পাঠানো হয়েছে। ইনবক্স (এবং স্প্যাম ফোল্ডার) চেক করুন।') }; const setNewPasswordSubmit = async (e: FormEvent) => { e.preventDefault(); setResetPasswordError(''); if (newPassword.length < 8) { setResetPasswordError('পাসওয়ার্ড কমপক্ষে ৮ অক্ষরের হতে হবে।'); return }; if (newPassword !== confirmPassword) { setResetPasswordError('দুটি পাসওয়ার্ড মিলছে না।'); return }; if (!supabase) { setResetPasswordError('Supabase is not configured.'); return }; const { error } = await supabase.auth.updateUser({ password: newPassword }); if (error) { setResetPasswordError(error.message); return }; setResetPasswordDone('পাসওয়ার্ড সফলভাবে সেট হয়েছে। এখন আপনি নতুন পাসওয়ার্ড দিয়ে লগইন করতে পারবেন।'); window.history.replaceState(null, '', '/admin') }; const signOut = async () => {
     if (supabase) await supabase.auth.signOut()
     setUser(null)
   }
@@ -320,7 +318,7 @@ function Admin() {
   if (!authChecked) {
     return (<div><h1 className="text-3xl font-black">Admin</h1><p className="text-[#6B7280] mt-2">Checking sign-in status.</p></div>)
   }
-  if (!user) {
+  if (isRecovery) { return (<div><h1 className="text-3xl font-black">Admin</h1><p className="text-[#6B7280] mt-2">নতুন পাসওয়ার্ড সেট করুন</p>{resetPasswordDone ? (<div><p className="bg-green-100 border border-green-300 rounded p-3 mt-4">{resetPasswordDone}</p><button className="bg-[#C8102E] text-white font-bold px-5 py-3 rounded hover:bg-[#A50D26] mt-4" onClick={() => setIsRecovery(false)}>আর্টিকেল ম্যানেজারে যান</button></div>) : (<form className="space-y-4 mt-4" onSubmit={setNewPasswordSubmit}><div><label className="block font-bold mb-1">নতুন পাসওয়ার্ড</label><input type="password" required minLength={8} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="w-full border rounded p-3" /></div><div><label className="block font-bold mb-1">নতুন পাসওয়ার্ড নিশ্চিত করুন</label><input type="password" required minLength={8} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="w-full border rounded p-3" /></div>{resetPasswordError && <p className="bg-red-100 border border-red-300 rounded p-3">{resetPasswordError}</p>}<button className="bg-[#C8102E] text-white font-bold px-5 py-3 rounded hover:bg-[#A50D26]">পাসওয়ার্ড সেট করুন</button></form>)}</div>) } if (!user) {
     return (
       <div>
         <h1 className="text-3xl font-black">Admin</h1>
@@ -335,7 +333,7 @@ function Admin() {
             <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className="w-full border rounded p-3" />
           </div>
           {authError && <p className="bg-red-100 border border-red-300 rounded p-3">{authError}</p>}
-          <button className="bg-[#C8102E] text-white font-bold px-5 py-3 rounded hover:bg-[#A50D26]">Sign in</button>
+          <button className="bg-[#C8102E] text-white font-bold px-5 py-3 rounded hover:bg-[#A50D26]">Sign in</button><button type="button" className="block text-[#C8102E] underline" onClick={sendResetEmail}>পাসওয়ার্ড ভুলে গেছেন?</button>{resetSent && <p className="bg-green-100 border border-green-300 rounded p-3">{resetSent}</p>}{resetError && <p className="bg-red-100 border border-red-300 rounded p-3">{resetError}</p>}
         </form>
       </div>
     )
