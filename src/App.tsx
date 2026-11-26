@@ -534,7 +534,7 @@ function Admin() {
     setBody(a.content.join('\n\n'))
     setEditingId(row.id)
     setEditingViews(a.views)
-    setEditingDeletedAt(a.deleted_at)
+    setEditingDeletedAt(a.deleted_at ?? null)
     setSaved(false)
     setFormError('')
     setDirty(false)
