@@ -82,7 +82,7 @@ function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col bg-white text-[#1F2937]">
       <header className="bg-white text-[#0F2A44]">
-        <div className="max-w-5xl mx-auto px-4 py-3 flex flex-col items-start gap-2 md:flex-row md:flex-wrap md:items-center md:justify-between">
+        <div className="max-w-5xl mx-auto px-4 py-3 flex flex-col items-start gap-2 md:flex-row md:flex-wrap md:items-center md:justify-between md:gap-3">
           <Link to="/" aria-label="The Newsroom Daily" className="inline-flex flex-col items-start leading-none">
             <span className="font-serif text-[1.75rem] md:text-[2.75rem] font-black tracking-tight text-[#0F2A44]">The Newsroom</span>
             <span className="mt-1 flex w-full items-center justify-end gap-1.5 md:mt-1.5">
@@ -90,35 +90,40 @@ function Layout({ children }: { children: React.ReactNode }) {
               <span aria-hidden="true" className="inline-block h-2.5 w-3 shrink-0 bg-[#C8102E] md:h-3 md:w-[15px]" />
             </span>
           </Link>
-          <nav ref={menuRef} className="relative w-[calc(100%+2rem)] min-w-0 flex items-center gap-5 whitespace-nowrap overflow-x-auto text-sm md:w-auto md:overflow-visible">
+          <nav ref={menuRef} className="relative w-[calc(100%+2rem)] min-w-0 flex items-center gap-5 whitespace-nowrap text-sm font-semibold -mx-4 px-4 md:w-auto md:mx-0 md:flex-wrap md:gap-4">
             <Link to="/" className="hover:underline">Home</Link>
             {CATEGORIES.slice(0, 2).map((c) => (<Link key={c.slug} to={'/category/' + c.slug} className="hover:underline">{c.name}</Link>))}
             {CATEGORIES.slice(2).map((c) => (<Link key={c.slug} to={'/category/' + c.slug} className="hidden hover:underline md:inline">{c.name}</Link>))}
             <Link to="/about" className="hidden hover:underline md:inline">About</Link>
             <Link to="/contact" className="hidden hover:underline md:inline">Contact</Link>
-            <button type="button" aria-label={menuOpen ? 'Close menu' : 'More links'} aria-expanded={menuOpen} onClick={() => setMenuOpen((v) => !v)} className="ml-auto font-bold hover:underline md:ml-0">More</button>
+            <button type="button" aria-label={menuOpen ? 'Close menu' : 'More links'} aria-expanded={menuOpen} onClick={() => setMenuOpen((v) => !v)} className={'flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white shadow-md transition-colors md:hidden ' + (menuOpen ? 'bg-[#C8102E]' : 'bg-[#0F2A44] hover:bg-[#C8102E] active:bg-[#C8102E]')}>
+              {menuOpen ? (
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3 3l12 12M15 3L3 15" stroke="white" strokeWidth="2.5" strokeLinecap="round" /></svg>
+              ) : (
+                <svg width="20" height="6" viewBox="0 0 20 6" fill="none" aria-hidden="true"><circle cx="3" cy="3" r="2.5" fill="white" /><circle cx="10" cy="3" r="2.5" fill="white" /><circle cx="17" cy="3" r="2.5" fill="white" /></svg>
+              )}
+            </button>
             {menuOpen && (
-              <div className="absolute right-0 top-full z-50 mt-2 w-56 divide-y divide-gray-100 overflow-hidden rounded-lg border bg-white shadow-lg">
+              <div className="absolute right-0 top-full z-50 mt-2 w-56 divide-y divide-gray-100 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl md:hidden">
                 {CATEGORIES.slice(2).map((c) => (<Link key={c.slug} to={'/category/' + c.slug} onClick={() => setMenuOpen(false)} className="menu-link block px-4 py-3 text-[#0F2A44]">{c.name}</Link>))}
                 <Link to="/about" onClick={() => setMenuOpen(false)} className="menu-link block px-4 py-3 text-[#0F2A44]">About</Link>
                 <Link to="/contact" onClick={() => setMenuOpen(false)} className="menu-link block px-4 py-3 text-[#0F2A44]">Contact</Link>
-                <Link to="/privacy" onClick={() => setMenuOpen(false)} className="menu-link block px-4 py-3 text-[#0F2A44]">Privacy Policy</Link>
               </div>
             )}
           </nav>
         </div>
+        <div aria-hidden="true" className="h-[3px] w-full bg-[#C8102E]" />
       </header>
-      <main className="flex-1 w-full max-w-5xl mx-auto px-4 py-8">{children}</main>
-      <footer className="bg-[#0F2A44] text-white">
-        <div className="max-w-5xl mx-auto px-4 py-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <p className="font-bold">{SITE_NAME}</p>
-          <nav className="flex flex-wrap gap-5 text-sm">
+      <main className="flex-1 max-w-5xl w-full mx-auto px-4 py-6 md:py-8">{children}</main>
+      <footer className="bg-[#0F2A44] text-gray-300">
+        <div className="max-w-5xl mx-auto px-4 py-6 text-sm flex flex-wrap gap-3 justify-between md:py-8 md:gap-6">
+          <p>{SITE_NAME} | Clear, practical guides for everyday readers.</p>
+          <p className="flex gap-4">
             <Link to="/about" className="hover:underline">About</Link>
             <Link to="/contact" className="hover:underline">Contact</Link>
             <Link to="/privacy" className="hover:underline">Privacy Policy</Link>
             <Link to="/admin" className="hover:underline">Admin</Link>
-          </nav>
-          <p className="text-sm text-white/70">© {new Date().getFullYear()} {SITE_NAME}. All rights reserved.</p>
+          </p>
         </div>
       </footer>
     </div>
@@ -126,50 +131,39 @@ function Layout({ children }: { children: React.ReactNode }) {
 }
 
 function Home() {
+  useSeo('Home', 'Clear, practical guides on GTA 6 gaming, tech how-to, money and finance, career and work, and everyday life.')
   const articles = useArticles()
   const [enabledCategories, setEnabledCategories] = useState<string[]>(ALL_CATEGORY_SLUGS)
   useEffect(() => { fetchHomepageCategories().then(setEnabledCategories) }, [])
-  useSeo('Clear, practical guides for gaming, tech, money, career and everyday life', 'The Newsroom Daily publishes clear, practical guides for gaming, tech how-tos, money, career and everyday life.')
   const visible = articles.filter((a) => enabledCategories.includes(a.category))
   const featured = visible.filter((a) => a.is_featured)
   const latest = visible[0]
-  const byCategory = (slug: string) => visible.filter((a) => a.category === slug).slice(0, 4)
-  const latestList = visible.filter((a) => !a.is_featured && a.slug !== latest?.slug)
   return (
     <div>
       {latest && (
-        <section className="bg-[#0F2A44] text-white rounded-lg p-6 md:p-10">
-          <p className="text-xs font-bold uppercase tracking-wide text-[#FCA5A5]">Latest</p>
-          <h1 className="font-serif text-3xl md:text-5xl font-black leading-tight mt-3"><Link to={'/article/' + latest.slug} className="hover:underline">{latest.title}</Link></h1>
-          <p className="text-white/80 mt-4 max-w-2xl">{latest.excerpt}</p>
-          <p className="mt-5"><Link to={'/article/' + latest.slug} className="inline-block bg-[#C8102E] text-white font-bold px-5 py-3 rounded hover:bg-[#A50D26]">Read article</Link></p>
+        <section className="bg-white border rounded-lg p-5 shadow-sm mb-8 md:p-6 md:mb-10">
+          <p className="text-xs font-bold uppercase tracking-wide text-[#C8102E]">Latest article</p>
+          <h1 className="text-3xl md:text-4xl font-black mt-2 leading-tight"><Link to={'/article/' + latest.slug} className="hover:underline">{latest.title}</Link></h1>
+          <p className="text-[#6B7280] mt-3 text-lg">{latest.excerpt}</p>
+          <p className="text-sm text-[#6B7280] mt-3">{latest.date} | {latest.author}</p>
+          <Link to={'/article/' + latest.slug} className="inline-block mt-4 bg-[#C8102E] text-white font-bold px-4 py-2 rounded">Read the guide</Link>
         </section>
       )}
       {featured.length > 0 && (
-        <section className="mt-10">
-          <h2 className="text-2xl font-black">Featured</h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 mt-4">
-            {featured.map((a) => (<ArticleCard key={a.slug} a={a} />))}
-          </div>
+        <section className="mb-8 md:mb-10">
+          <h2 className="text-2xl font-bold mb-4">Featured</h2>
+          <div className="grid md:grid-cols-2 gap-5">{featured.map((a) => (<ArticleCard key={a.slug} a={a} />))}</div>
         </section>
       )}
-      <h2 className="text-2xl font-black mt-10">Latest articles</h2>
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 mt-4">
-        {latestList.map((a) => (<ArticleCard key={a.slug} a={a} />))}
-      </div>
-      {CATEGORIES.filter((c) => enabledCategories.includes(c.slug)).map((cat) => {
-        const list = byCategory(cat.slug)
-        if (list.length === 0) return null
+      <h2 className="text-2xl font-bold mb-4">Latest articles</h2>
+      <div className="grid md:grid-cols-2 gap-5 mb-8 md:mb-10">{visible.map((a) => (<ArticleCard key={a.slug} a={a} />))}</div>
+      {CATEGORIES.filter((c) => enabledCategories.includes(c.slug)).map((c) => {
+        const list = visible.filter((a) => a.category === c.slug)
         return (
-          <section key={cat.slug} className="mt-10">
-            <div className="flex items-baseline justify-between gap-4">
-              <h2 className="text-2xl font-black">{cat.name}</h2>
-              <Link to={'/category/' + cat.slug} className="text-[#C8102E] font-bold text-sm">View all</Link>
-            </div>
-            <p className="text-[#6B7280] mt-1">{cat.description}</p>
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5 mt-4">
-              {list.map((a) => (<ArticleCard key={a.slug} a={a} />))}
-            </div>
+          <section key={c.slug} className="mb-8 md:mb-10">
+            <h2 className="text-2xl font-bold"><Link to={'/category/' + c.slug} className="hover:underline">{c.name}</Link></h2>
+            <p className="text-[#6B7280] mt-1 mb-4">{c.description}</p>
+            {list.length ? (<div className="grid md:grid-cols-2 gap-5">{list.map((a) => (<ArticleCard key={a.slug} a={a} />))}</div>) : (<p className="text-[#6B7280]">More guides in this category are coming soon.</p>)}
           </section>
         )
       })}
@@ -180,108 +174,82 @@ function Home() {
 function ArticlePage() {
   const { slug } = useParams()
   const articles = useArticles()
-  const article = articles.find((a) => a.slug === slug)
-  useSeo(article ? article.title : 'Article not found', article ? article.description : 'The article you are looking for does not exist.')
+  const a = articles.find((x) => x.slug === slug)
+  useSeo(a ? a.title : 'Article not found', a ? a.description : 'This article could not be found.')
   useEffect(() => {
-    if (!article) return
-    const key = 'viewed-' + article.slug
+    if (!a) return
+    const key = 'viewed-' + a.slug
     if (!sessionStorage.getItem(key)) {
       sessionStorage.setItem(key, '1')
-      void incrementArticleViews(article.slug)
+      void incrementArticleViews(a.slug)
     }
-  }, [article?.slug])
-  if (!article) {
-    return (
-      <div>
-        <h1 className="text-3xl font-black">Article not found</h1>
-        <p className="mt-3"><Link to="/" className="text-[#C8102E] underline">Back to home</Link></p>
-      </div>
-    )
-  }
-  const related = articles.filter((a) => a.slug !== article.slug && a.category === article.category).slice(0, 4)
-  const words = countWords(article.content.join(' '))
+  }, [a?.slug])
+  if (!a) return (<div><h1 className="text-3xl font-bold">Article not found</h1><p className="mt-3"><Link to="/" className="text-[#C8102E] underline">Back to home</Link></p></div>)
+  const cat = categoryBySlug(a.category)
+  const related = articles.filter((x) => x.category === a.category && x.slug !== a.slug)
+  const words = countWords(a.content.join(' '))
   const readMinutes = Math.max(1, Math.ceil(words / 200))
   return (
     <article>
-      <p className="text-xs font-bold uppercase tracking-wide text-[#C8102E]">{categoryBySlug(article.category)?.name || article.category}</p>
-      <h1 className="font-serif text-3xl md:text-5xl font-black leading-tight mt-3">{article.title}</h1>
-      <p className="text-[#6B7280] mt-3">{article.date} | {article.author} | {readMinutes} min read{article.views > 0 ? ' | ' + article.views + ' views' : ''}</p>
-      {article.cover && (<img src={article.cover} alt={article.cover_alt || article.title} className="w-full rounded-lg mt-6" />)}
-      <div className="mt-6 space-y-5 text-lg leading-relaxed">
-        {article.content.map((para, i) => (para.startsWith('## ') ? (<h2 key={i} className="font-serif text-2xl font-black pt-4">{para.slice(3)}</h2>) : para.startsWith('# ') ? (<h2 key={i} className="font-serif text-2xl font-black pt-4">{para.slice(2)}</h2>) : (<p key={i}>{para}</p>)))}
+      <p className="text-xs font-bold uppercase tracking-wide text-[#C8102E]"><Link to={'/category/' + a.category} className="hover:underline">{cat ? cat.name : a.category}</Link></p>
+      <h1 className="text-3xl md:text-4xl font-black mt-2 leading-tight">{a.title}</h1>
+      <p className="text-sm text-[#6B7280] mt-3">{a.date} | By {a.author} | {readMinutes} min read{a.views > 0 ? ' | ' + a.views + ' views' : ''}</p>
+      {a.cover && (<img src={a.cover} alt={a.cover_alt || a.title} className="w-full rounded-lg mt-6" />)}
+      <div className="mt-6 space-y-4 text-lg leading-relaxed bg-white border rounded-lg p-6 shadow-sm">
+        {a.content.map((block, i) => block.startsWith('## ') ? (<h2 key={i} className="text-2xl font-bold pt-2">{block.slice(3)}</h2>) : (<p key={i}>{block}</p>))}
       </div>
-      <p className="text-sm text-[#6B7280] mt-8">Sources: {SITE_NAME} editorial guides and official product documentation. Prices and availability change often, so check the official store before you buy.</p>
-      <p className="mt-6"><Link to="/" className="text-[#C8102E] underline">Back to home</Link></p>
-      {related.length > 0 && (
-        <section className="mt-10">
-          <h2 className="text-2xl font-black">More from {categoryBySlug(article.category)?.name || article.category}</h2>
-          <div className="grid md:grid-cols-2 gap-5 mt-4">
-            {related.map((a) => (<ArticleCard key={a.slug} a={a} />))}
-          </div>
-        </section>
-      )}
+      <p className="text-sm text-[#6B7280] mt-4">Sources: official game and product pages, and general guidance from public help pages. Money and health articles are general education, not personal advice.</p>
+      {related.length > 0 && (<section className="mt-10"><h2 className="text-2xl font-bold mb-4">Related articles</h2><div className="grid md:grid-cols-2 gap-5">{related.map((r) => (<ArticleCard key={r.slug} a={r} />))}</div></section>)}
+      <p className="mt-8"><Link to="/" className="text-[#C8102E] underline">Back to home</Link></p>
     </article>
   )
 }
 
 function CategoryPage() {
   const { slug } = useParams()
+  const cat = slug ? categoryBySlug(slug) : undefined
+  useSeo(cat ? cat.name : 'Category not found', cat ? cat.description : 'This category could not be found.')
+  if (!cat) return (<div><h1 className="text-3xl font-bold">Category not found</h1><p className="mt-3"><Link to="/" className="text-[#C8102E] underline">Back to home</Link></p></div>)
   const articles = useArticles()
-  const cat = categoryBySlug(slug || '')
-  const list = articles.filter((a) => a.category === slug)
-  useSeo(cat ? cat.name : 'Category', cat ? cat.description : 'Articles in this category.')
-  if (!cat) {
-    return (
-      <div>
-        <h1 className="text-3xl font-black">Category not found</h1>
-        <p className="mt-3"><Link to="/" className="text-[#C8102E] underline">Back to home</Link></p>
-      </div>
-    )
-  }
+  const list = articles.filter((a) => a.category === cat.slug)
   return (
     <div>
-      <h1 className="font-serif text-3xl md:text-5xl font-black leading-tight">{cat.name}</h1>
-      <p className="text-[#6B7280] mt-3">{cat.description}</p>
-      {list.length === 0 ? (
-        <p className="mt-6">No articles in this category yet.</p>
-      ) : (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 mt-6">
-          {list.map((a) => (<ArticleCard key={a.slug} a={a} />))}
-        </div>
-      )}
+      <h1 className="text-3xl font-bold">{cat.name}</h1>
+      <p className="text-[#6B7280] mt-2 mb-6">{cat.description}</p>
+      {list.length ? (<div className="grid md:grid-cols-2 gap-5">{list.map((a) => (<ArticleCard key={a.slug} a={a} />))}</div>) : (<p className="text-[#6B7280]">More guides in this category are coming soon. Check back for new articles.</p>)}
     </div>
   )
 }
 
 function About() {
-  useSeo('About', 'About The Newsroom Daily: a small, independent news and guides site.')
+  useSeo('About', 'About The Newsroom Daily: clear, practical guides on gaming, tech, money, career and everyday life, written in plain words.')
   return (
-    <div>
-      <h1 className="font-serif text-3xl md:text-5xl font-black leading-tight">About The Newsroom Daily</h1>
-      <div className="mt-6 space-y-5 text-lg leading-relaxed">
-        <p>We are a small, independent news and guides site. We write clear, practical articles about gaming, tech how-tos, money, career and everyday life.</p>
-        <p>We write in our own words, keep paragraphs short, and check facts before we publish. Money and health articles are general education, not personal advice. You can find us at {SITE_URL}.</p>
-        <p>Questions or tips? Visit the <Link to="/contact" className="text-[#C8102E] underline">contact page</Link>.</p>
-      </div>
+    <div className="bg-white border rounded-lg p-6 shadow-sm space-y-4 text-lg leading-relaxed">
+      <h1 className="text-3xl font-black">About {SITE_NAME}</h1>
+      <p>{SITE_NAME} is a new English news and guide site. Our goal is simple: explain useful things in plain words, so any reader can act on them.</p>
+      <p>We cover five areas: GTA 6 gaming, tech how-to, money and finance, career and work, and everyday guides. Most of our work is evergreen, which means a good guide should still help a reader months or years after it is published.</p>
+      <p>We write in our own words, keep paragraphs short, and check facts before we publish. Money and health articles are general education, not personal advice. You can find us at {SITE_URL}.</p>
+      <p>The site name is provisional while the project grows, so the name is kept in one place in the code and is easy to change later.</p>
     </div>
   )
 }
 
 function Contact() {
+  useSeo('Contact', 'Contact The Newsroom Daily: send a question, a correction, or a story idea.')
   const [params] = useSearchParams()
   const sent = params.get('sent') === '1'
-  useSeo('Contact', 'Contact The Newsroom Daily: send a question, correction or tip.')
   return (
     <div>
-      <h1 className="font-serif text-3xl md:text-5xl font-black leading-tight">Contact</h1>
-      <p className="mt-4 text-lg leading-relaxed">Questions, corrections or tips? Send us a message and we will get back to you.</p>
+      <h1 className="text-3xl font-black">Contact</h1>
+      <p className="text-[#6B7280] mt-2">Send a question, a correction, or a story idea. We read every message and reply by email when an answer is needed.</p>
       {sent ? (
-        <p className="bg-green-100 border border-green-300 text-green-800 rounded p-4 mt-6">Thank you. Your message has been sent.</p>
+        <p className="bg-green-100 border border-green-300 rounded p-4 mt-4">Thank you. Your message was sent. We will reply by email when an answer is needed.</p>
       ) : (
-        <form action="https://formsubmit.co/rtvsakib@gmail.com" method="POST" className="space-y-4 mt-6 max-w-lg">
+        <form className="space-y-4 mt-4" action="https://formsubmit.co/rtvsakib@gmail.com" method="POST">
           <input type="hidden" name="_subject" value="New contact message - The Newsroom Daily" />
-          <input type="hidden" name="_next" value={SITE_URL + '/contact?sent=1'} />
           <input type="hidden" name="_captcha" value="false" />
+          <input type="hidden" name="_template" value="table" />
+          <input type="hidden" name="_next" value={SITE_URL + '/contact?sent=1'} />
           <div>
             <label className="block font-bold mb-1">Name</label>
             <input name="name" required className="w-full border rounded p-3" />
@@ -292,7 +260,7 @@ function Contact() {
           </div>
           <div>
             <label className="block font-bold mb-1">Message</label>
-            <textarea name="message" rows={5} required className="w-full border rounded p-3" />
+            <textarea name="message" required rows={5} className="w-full border rounded p-3" />
           </div>
           <button className="bg-[#C8102E] text-white font-bold px-5 py-3 rounded hover:bg-[#A50D26]">Send message</button>
         </form>
@@ -302,16 +270,15 @@ function Contact() {
 }
 
 function Privacy() {
-  useSeo('Privacy Policy', 'Privacy Policy for The Newsroom Daily. We collect only the information you choose to share with us.')
+  useSeo('Privacy Policy', 'Privacy Policy for The Newsroom Daily: what we collect, how we use it, and how to contact us.')
   return (
-    <div>
-      <h1 className="font-serif text-3xl md:text-5xl font-black leading-tight">Privacy Policy</h1>
-      <p className="mt-4">Last updated: 25 November 2026.</p>
-      <div className="mt-6 space-y-5 leading-relaxed">
-        <p>We run a small, independent news and guides site. We collect only the information you choose to share with us, for example when you send a message through our contact form. We use that information only to reply to you.</p>
-        <p>We use Supabase to store published articles and to sign in the site admin. We do not sell personal information and we do not show third-party advertising on this site.</p>
-        <p>If you have a privacy question, contact us through the <Link to="/contact" className="text-[#C8102E] underline">contact page</Link>.</p>
-      </div>
+    <div className="bg-white border rounded-lg p-6 shadow-sm space-y-4 text-lg leading-relaxed">
+      <h1 className="text-3xl font-black">Privacy Policy</h1>
+      <p>Last updated: 25 November 2026.</p>
+      <p>{SITE_NAME} does not sell personal information. This site does not use advertising trackers at launch, and it does not run Google AdSense.</p>
+      <p>If you use the contact form, we receive the name, email address, and message you type. We use that only to read and reply to your message. We do not share it with other parties.</p>
+      <p>This site may use basic, privacy friendly visit counts from its host to understand which pages are read. Those counts do not identify individual readers.</p>
+      <p>If you have a privacy question, use the Contact page. This policy will be updated here if the site adds analytics, comments, or advertising in future.</p>
     </div>
   )
 }
@@ -338,7 +305,7 @@ function buildItemFromSnapshot(s: AdminSnapshot): PublicArticle {
   return {
     slug: s.slug.trim(),
     title: s.title.trim(),
-    description: s.meta.trim(),
+    description: s.meta.trim() || s.excerpt.trim(),
     category: s.category,
     date: s.status === 'scheduled' && s.scheduledAt ? s.scheduledAt.slice(0, 10) : s.pubDate,
     author: SITE_NAME,
@@ -355,18 +322,19 @@ function buildItemFromSnapshot(s: AdminSnapshot): PublicArticle {
 }
 
 function Admin() {
+  useSeo('Admin', 'Admin page for The Newsroom Daily: add and edit articles in Supabase.')
   const [user, setUser] = useState<string | null>(null)
   const [authChecked, setAuthChecked] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [authError, setAuthError] = useState('')
   const [isRecovery, setIsRecovery] = useState(false)
-  const [resetSent, setResetSent] = useState(false)
+  const [resetSent, setResetSent] = useState('')
   const [resetError, setResetError] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [resetPasswordError, setResetPasswordError] = useState('')
-  const [resetPasswordDone, setResetPasswordDone] = useState(false)
+  const [resetPasswordDone, setResetPasswordDone] = useState('')
   const [rows, setRows] = useState<ArticleRow[]>([])
   const [loading, setLoading] = useState(false)
   const [title, setTitle] = useState('')
@@ -377,14 +345,14 @@ function Admin() {
   const [body, setBody] = useState('')
   const [cover, setCover] = useState('')
   const [coverAlt, setCoverAlt] = useState('')
-  const [pubDate, setPubDate] = useState(new Date().toISOString().slice(0, 10))
+  const [pubDate, setPubDate] = useState(() => new Date().toISOString().slice(0, 10))
   const [scheduledAt, setScheduledAt] = useState('')
   const [isFeatured, setIsFeatured] = useState(false)
   const [status, setStatus] = useState('published')
   const [editingId, setEditingId] = useState<number | null>(null)
   const [editingViews, setEditingViews] = useState(0)
   const [editingDeletedAt, setEditingDeletedAt] = useState<string | null>(null)
-  const [saved, setSaved] = useState(false)
+  const [saved, setSaved] = useState('')
   const [formError, setFormError] = useState('')
   const [revisions, setRevisions] = useState<ArticleRevision[]>([])
   const [dirty, setDirty] = useState(false)
@@ -397,7 +365,6 @@ function Admin() {
   const [restoreMsg, setRestoreMsg] = useState('')
   const [view, setView] = useState<'articles' | 'trash'>('articles')
   const [deleteTarget, setDeleteTarget] = useState<{ row: ArticleRow; permanent: boolean } | null>(null)
-  useSeo('Admin', 'Admin page for The Newsroom Daily: add and edit articles in Supabase.')
 
   const formSnapshotRef = useRef<AdminSnapshot & { dirty: boolean }>({
     title: '', slug: '', category: 'gaming', status: 'published', excerpt: '', meta: '', body: '', cover: '', coverAlt: '', pubDate: new Date().toISOString().slice(0, 10), scheduledAt: '', isFeatured: false, editingId: null, editingViews: 0, editingDeletedAt: null, dirty: false,
@@ -408,16 +375,14 @@ function Admin() {
   })
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const isRecovery = window.location.hash.includes('type=recovery') || params.get('new_password') === '1'
-    if (isRecovery) setIsRecovery(true)
     if (!supabase) { setAuthChecked(true); return }
-    supabase.auth.getSession().then(({ data }) => { setUser(data.session?.user.email ?? null); setAuthChecked(true) })
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user.email ?? null)
-      if (event === 'PASSWORD_RECOVERY') setIsRecovery(true)
+    supabase.auth.getSession().then(({ data }) => {
+      setUser(data.session?.user?.email ?? null)
+      setAuthChecked(true)
     })
-    return () => subscription.unsubscribe()
+    if (window.location.hash.includes('type=recovery') || window.location.search.includes('type=recovery')) setIsRecovery(true)
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => { setUser(session?.user?.email ?? null); if (event === 'PASSWORD_RECOVERY') setIsRecovery(true) })
+    return () => { listener.subscription.unsubscribe() }
   }, [])
 
   const load = async () => {
@@ -425,12 +390,11 @@ function Admin() {
     setLoading(true)
     const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
     await supabase.from('articles').delete().lt('deleted_at', cutoff)
-    const all = await fetchAllArticles()
-    setRows(all)
+    const list = await fetchAllArticles()
+    setRows(list)
     setHomeCategories(await fetchHomepageCategories())
     setLoading(false)
   }
-
   useEffect(() => { if (user) load() }, [user])
 
   const autosaveTick = async () => {
@@ -462,18 +426,17 @@ function Admin() {
     e.preventDefault()
     setAuthError('')
     if (!supabase) { setAuthError('Supabase is not configured.'); return }
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) setAuthError(error.message)
-    else setUser(data.user.email ?? null)
   }
 
   const sendResetEmail = async () => {
     setResetError('')
-    setResetSent(false)
+    setResetSent('')
     if (!supabase) { setResetError('Supabase is not configured.'); return }
     const { error } = await supabase.auth.resetPasswordForEmail('rtvsakib@gmail.com', { redirectTo: 'https://thenewsroomdaily.vercel.app/admin' })
     if (error) setResetError(error.message)
-    else setResetSent(true)
+    else setResetSent('পাসওয়ার্ড রিসেটের লিঙ্ক rtvsakib@gmail.com-এ পাঠানো হয়েছে। ইনবক্স (এবং স্প্যাম ফোল্ডার) চেক করুন।')
   }
 
   const setNewPasswordSubmit = async (e: FormEvent) => {
@@ -484,17 +447,17 @@ function Admin() {
     if (!supabase) { setResetPasswordError('Supabase is not configured.'); return }
     const { error } = await supabase.auth.updateUser({ password: newPassword })
     if (error) { setResetPasswordError(error.message); return }
-    setResetPasswordDone(true)
+    setResetPasswordDone('পাসওয়ার্ড সফলভাবে সেট হয়েছে। এখন আপনি নতুন পাসওয়ার্ড দিয়ে লগইন করতে পারবেন।')
     window.history.replaceState(null, '', '/admin')
   }
 
   const signOut = async () => {
-    if (!supabase) return
-    await supabase.auth.signOut()
+    if (supabase) await supabase.auth.signOut()
     setUser(null)
   }
 
   const resetForm = () => {
+    setEditingId(null)
     setTitle('')
     setSlug('')
     setCategory('gaming')
@@ -507,7 +470,6 @@ function Admin() {
     setScheduledAt('')
     setIsFeatured(false)
     setStatus('published')
-    setEditingId(null)
     setEditingViews(0)
     setEditingDeletedAt(null)
     setRevisions([])
@@ -520,22 +482,22 @@ function Admin() {
 
   const startEdit = async (row: ArticleRow) => {
     const a = rowToArticle(row)
+    setEditingId(row.id)
     setTitle(a.title)
     setSlug(a.slug)
     setCategory(a.category)
-    setStatus(a.status || 'published')
     setExcerpt(a.excerpt)
     setMeta(a.description)
+    setBody(a.content.join('\n\n'))
     setCover(a.cover || '')
     setCoverAlt(a.cover_alt || '')
     setPubDate(a.date || new Date().toISOString().slice(0, 10))
     setScheduledAt(a.scheduled_at ? a.scheduled_at.slice(0, 16) : '')
     setIsFeatured(a.is_featured)
-    setBody(a.content.join('\n\n'))
-    setEditingId(row.id)
+    setStatus(a.status || 'published')
     setEditingViews(a.views)
     setEditingDeletedAt(a.deleted_at ?? null)
-    setSaved(false)
+    setSaved('')
     setFormError('')
     setDirty(false)
     setAutosaveStatus('')
@@ -547,11 +509,10 @@ function Admin() {
 
   const submit = async (e: FormEvent) => {
     e.preventDefault()
-    if (!supabase) { setFormError('Supabase is not configured.'); return }
-    setSaved(false)
     setFormError('')
+    setSaved('')
+    if (!supabase) { setFormError('Supabase is not configured.'); return }
     const s = formSnapshotRef.current
-    if (!s.title.trim() || !s.slug.trim()) { setFormError('Title and slug are required.'); return }
     if (s.status === 'scheduled' && !s.scheduledAt) { setFormError('Choose a publish time for a Scheduled article.'); return }
     const row = articleToRow(buildItemFromSnapshot(s))
     if (s.editingId !== null) {
@@ -563,7 +524,7 @@ function Admin() {
       if (error) { setFormError(error.message); return }
       await saveRevision(data.id, { article_slug: s.slug.trim(), title: s.title.trim(), excerpt: s.excerpt.trim(), meta_description: s.meta.trim(), content: s.body })
     }
-    setSaved(true)
+    setSaved('Saved to Supabase at ' + new Date().toLocaleTimeString())
     setDirty(false)
     setAutosaveStatus('Saved ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))
     resetForm()
@@ -577,10 +538,11 @@ function Admin() {
     if (permanent) {
       const { error } = await supabase.from('articles').delete().eq('id', row.id)
       if (error) setFormError(error.message)
-      else setSaved(true)
+      else setSaved('Deleted from Supabase at ' + new Date().toLocaleTimeString())
     } else {
       const { error } = await supabase.from('articles').update({ deleted_at: new Date().toISOString() }).eq('id', row.id)
       if (error) setFormError(error.message)
+      else setSaved('Moved to Trash at ' + new Date().toLocaleTimeString())
     }
     load()
   }
@@ -589,6 +551,7 @@ function Admin() {
     if (!supabase) return
     const { error } = await supabase.from('articles').update({ deleted_at: null }).eq('id', row.id)
     if (error) setFormError(error.message)
+    else setSaved('Restored from Trash at ' + new Date().toLocaleTimeString())
     load()
   }
 
@@ -630,6 +593,15 @@ function Admin() {
     setSettingsMsg('Homepage categories saved.')
   }
 
+  if (!supabaseConfigured) {
+    return (
+      <div>
+        <h1 className="text-3xl font-black">Admin</h1>
+        <p className="text-[#6B7280] mt-2">Supabase is not configured. Set the Supabase env vars in Vercel to use the admin.</p>
+      </div>
+    )
+  }
+
   if (!authChecked) {
     return (
       <div>
@@ -646,18 +618,18 @@ function Admin() {
         <p className="mt-3">নতুন পাসওয়ার্ড সেট করুন</p>
         {resetPasswordDone ? (
           <div>
-            <p className="bg-green-100 border border-green-300 text-green-800 rounded p-4 mt-4">পাসওয়ার্ড সফলভাবে পরিবর্তন হয়েছে। এখন আপনি নতুন পাসওয়ার্ড দিয়ে লগইন করতে পারবেন।</p>
-            <button onClick={() => setIsRecovery(false)} className="mt-4 bg-[#C8102E] text-white font-bold px-5 py-3 rounded hover:bg-[#A50D26]">আর্টিকেল ম্যানেজারে যান</button>
+            <p className="bg-green-100 border border-green-300 text-green-800 rounded p-4 mt-4">{resetPasswordDone}</p>
+            <button className="bg-[#C8102E] text-white font-bold px-5 py-3 rounded hover:bg-[#A50D26] mt-4" onClick={() => setIsRecovery(false)}>আর্টিকেল ম্যানেজারে যান</button>
           </div>
         ) : (
-          <form onSubmit={setNewPasswordSubmit} className="space-y-4 mt-4 max-w-md">
+          <form className="space-y-4 mt-4" onSubmit={setNewPasswordSubmit}>
             <div>
               <label className="block font-bold mb-1">নতুন পাসওয়ার্ড</label>
-              <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="w-full border rounded p-3" />
+              <input type="password" required minLength={8} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="w-full border rounded p-3" />
             </div>
             <div>
               <label className="block font-bold mb-1">নতুন পাসওয়ার্ড নিশ্চিত করুন</label>
-              <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="w-full border rounded p-3" />
+              <input type="password" required minLength={8} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="w-full border rounded p-3" />
             </div>
             {resetPasswordError && <p className="bg-red-100 border border-red-300 text-red-800 rounded p-3">{resetPasswordError}</p>}
             <button className="bg-[#C8102E] text-white font-bold px-5 py-3 rounded hover:bg-[#A50D26]">পাসওয়ার্ড সেট করুন</button>
@@ -675,16 +647,16 @@ function Admin() {
         <form onSubmit={signIn} className="space-y-4 mt-4 max-w-md">
           <div>
             <label className="block font-bold mb-1">Email</label>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full border rounded p-3" />
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full border rounded p-3" required />
           </div>
           <div>
             <label className="block font-bold mb-1">Password</label>
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full border rounded p-3" />
+            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full border rounded p-3" required />
           </div>
           {authError && <p className="bg-red-100 border border-red-300 text-red-800 rounded p-3">{authError}</p>}
           <button className="bg-[#C8102E] text-white font-bold px-5 py-3 rounded hover:bg-[#A50D26]">Sign in</button>
-          <button type="button" onClick={sendResetEmail} className="ml-3 underline text-[#C8102E]">পাসওয়ার্ড ভুলে গেছেন?</button>
-          {resetSent && <p className="bg-green-100 border border-green-300 text-green-800 rounded p-3">পাসওয়ার্ড রিসেট লিঙ্ক rtvsakib@gmail.com-এ পাঠানো হয়েছে। ইনবক্স (এবং স্প্যাম ফোল্ডার) চেক করুন।</p>}
+          <button type="button" className="block text-[#C8102E] underline" onClick={sendResetEmail}>পাসওয়ার্ড ভুলে গেছেন?</button>
+          {resetSent && <p className="bg-green-100 border border-green-300 text-green-800 rounded p-3">{resetSent}</p>}
           {resetError && <p className="bg-red-100 border border-red-300 text-red-800 rounded p-3">{resetError}</p>}
         </form>
       </div>
@@ -705,15 +677,15 @@ function Admin() {
 
   return (
     <div>
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-wrap justify-between gap-3 items-center">
         <h1 className="text-3xl font-black">Admin</h1>
-        <div className="flex items-center gap-3 text-sm">
-          <span className="text-[#6B7280]">Signed in as {user}</span>
-          <button onClick={signOut} className="underline text-[#C8102E]">Log out</button>
-        </div>
+        <span className="flex gap-3 items-center">
+          <span className="text-[#6B7280] text-sm">Signed in as {user}</span>
+          <button className="text-[#C8102E] underline" onClick={signOut}>Log out</button>
+        </span>
       </div>
-      <p className="mt-3">Add and edit articles. Articles are saved to the Supabase articles table. Supabase status: {supabaseConfigured ? 'connected' : 'not configured'}.</p>
-      {saved && <p className="bg-green-100 border border-green-300 text-green-800 rounded p-3 mt-4">Saved.</p>}
+      <p className="text-[#6B7280] mt-2">Add and edit articles. Articles are saved to the Supabase articles table. Supabase status: connected.</p>
+      {saved && <p className="bg-green-100 border border-green-300 rounded p-3 mt-4">{saved}</p>}
       {formError && <p className="bg-red-100 border border-red-300 text-red-800 rounded p-3 mt-4">{formError}</p>}
 
       <section className="grid grid-cols-2 md:grid-cols-5 gap-4 mt-6">
@@ -741,16 +713,14 @@ function Admin() {
         )}
       </section>
 
-      <form onSubmit={submit} className="space-y-4 mt-8">
-        <h2 className="text-2xl font-black">{editingId ? 'Edit article' : 'New article'}</h2>
-        <p className="text-sm text-[#6B7280]">{autosaveStatus || (dirty ? 'Unsaved changes — autosave runs every 5 seconds while you edit a saved article.' : 'Autosave runs every 5 seconds while you edit a saved article.')}</p>
+      <form className="space-y-4 mt-4" onSubmit={submit}>
         <div>
           <label className="block font-bold mb-1">Title</label>
-          <input required value={title} onChange={(e) => { setTitle(e.target.value); setDirty(true) }} className="w-full border rounded p-3" />
+          <input value={title} onChange={(e) => { setTitle(e.target.value); setDirty(true) }} className="w-full border rounded p-3" required />
         </div>
         <div>
           <label className="block font-bold mb-1">Slug</label>
-          <input required value={slug} onChange={(e) => { setSlug(e.target.value); setDirty(true) }} className="w-full border rounded p-3" />
+          <input value={slug} onChange={(e) => { setSlug(e.target.value); setDirty(true) }} className="w-full border rounded p-3" required />
         </div>
         <div>
           <label className="block font-bold mb-1">Category</label>
@@ -821,6 +791,7 @@ function Admin() {
           <label className="block font-bold mb-1">Content (paragraphs separated by a blank line, subheads start with ##)</label>
           <textarea rows={8} value={body} onChange={(e) => { setBody(e.target.value); setDirty(true) }} className="w-full border rounded p-3" />
         </div>
+        <p className="text-sm text-[#6B7280]">{autosaveStatus || (dirty ? 'Unsaved changes — autosave runs every 5 seconds while you edit a saved article.' : 'Autosave runs every 5 seconds while you edit a saved article.')}</p>
         {editingId !== null && (
           <div className="border rounded p-4">
             <h3 className="font-bold">Revision history</h3>
