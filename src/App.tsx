@@ -60,7 +60,7 @@ export function countWords(text: string): number {
   return text.trim() ? words.length : 0
 }
 
-function ArticleCard({ a }: { a: PublicArticle }) {
+const relativeDay = (s: string): string => { const d = new Date(s); if (Number.isNaN(d.getTime())) return s; const n = new Date(); const days = Math.floor((new Date(n.getFullYear(), n.getMonth(), n.getDate()).getTime() - new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime()) / 86400000); return days <= 0 ? 'Today' : days === 1 ? 'Yesterday' : days + ' days ago'; }; function ArticleCard({ a }: { a: PublicArticle }) {
   const cat = categoryBySlug(a.category)
   const { isSaved, toggleSaved } = useBookmarks()
   const articleId = a.id
@@ -200,22 +200,20 @@ function Home() {
   useSeo('Home', 'The Newsroom Daily brings clear, practical guides on gaming, tech how-to, money and finance, career and work, and everyday life.')
   const featured = articles.find((a) => a.is_featured)
   const latest = featured ?? articles[0]
-  const visible = articles.filter((a) => isDuePublished(a.status, a.scheduled_at))
+  const visible = articles.filter((a) => isDuePublished(a.status, a.scheduled_at)); const nextTwo = visible.filter((a) => a.slug !== latest?.slug).slice(0, 2)
   const shownCategories = CATEGORIES.filter((c) => homeCategories.includes(c.slug))
   return (
     <div>
       {loading && <p className="text-[#6B7280]">Loading articles...</p>}
       {latest && (
-        <section className="bg-white border rounded-lg shadow-sm mb-8 md:mb-10 overflow-hidden dark:bg-[#122840] dark:border-[#24405E]">
-          {latest.cover && (<img src={latest.cover} alt={latest.cover_alt || latest.title} className="w-full aspect-video md:aspect-auto md:h-[440px] object-cover" />)}
-          <div className="p-6">
+        <section className="mb-12 md:mb-16 pb-8 md:pb-10 border-b border-gray-200 dark:border-[#24405E]">
+          <div className="grid gap-8 md:grid-cols-5 md:gap-6"><div className="md:col-span-3">{latest.cover && (<img src={latest.cover} alt={latest.cover_alt || latest.title} className="hero-cover w-full aspect-video md:aspect-auto md:h-[440px] object-cover" />)}
+          <div className="pt-5">
             <p className="text-xs font-bold tracking-widest text-[#C8102E]">LATEST ARTICLE</p>
-            <h1 className="text-3xl md:text-4xl font-black mt-2 leading-tight"><Link to={articleUrl(latest)} className="hover:text-[#C8102E] hover:underline">{latest.title}</Link></h1>
-            <p className="text-[#6B7280] mt-3">{latest.excerpt}</p>
+            <h1 className="text-4xl md:text-[40px] font-black mt-2 leading-tight"><Link to={articleUrl(latest)} className="hover:text-[#C8102E] hover:underline">{latest.title}</Link></h1>
+            <p className="text-[#6B7280] mt-3 line-clamp-2">{latest.excerpt}</p>
             <p className="text-sm text-[#6B7280] mt-3">{latest.date} | The Newsroom Daily</p>
-            <Link to={articleUrl(latest)} className="inline-block mt-4 bg-[#C8102E] text-white font-bold px-4 py-2 rounded hover:bg-[#A50D26]">Read the guide &rarr;</Link>
-          </div>
-        </section>
+            <Link to={articleUrl(latest)} className="inline-block mt-4 bg-[#C8102E] text-white font-bold px-4 py-2 rounded hover:bg-[#A50D26]">Read the guide &rarr;</Link></div></div><div className="md:col-span-2 flex flex-col gap-6 md:gap-8 md:border-l md:border-gray-200 md:dark:border-[#24405E] md:pl-6">{nextTwo.map((a) => (<article key={a.slug} className="flex gap-4 items-start border-b border-gray-200 dark:border-[#24405E] pb-6 last:border-b-0 last:pb-0"><div className="min-w-0 flex-1"><p className="text-xs font-bold tracking-widest text-[#C8102E]">{(categoryBySlug(a.category)?.name ?? a.category).toUpperCase()}</p><h2 className="text-lg font-bold leading-snug mt-1"><Link to={articleUrl(a)} className="hover:text-[#C8102E] hover:underline">{a.title}</Link></h2><p className="text-sm text-[#6B7280] mt-1 line-clamp-1">{a.excerpt}</p></div>{a.cover && (<Link to={articleUrl(a)} className="shrink-0"><img src={a.cover} alt={a.cover_alt || a.title} className="w-24 h-24 md:w-28 md:h-28 object-cover" /></Link>)}</article>))}</div></div></section>
       )}
       <MostReadList articles={visible} />
       <h2 className="text-2xl font-bold mb-4">Latest articles</h2>
