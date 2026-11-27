@@ -5,7 +5,7 @@ import { CATEGORIES, SITE_NAME, SITE_URL, categoryBySlug } from './data/site'
 import {
   supabase,
   supabaseConfigured,
-  fetchPublishedArticles,
+  fetchPublishedArticles, fetchArticleBySlug, fetchRelatedArticles, isDuePublished,
   fetchAllArticles,
   rowToArticle,
   articleToRow,
@@ -173,8 +173,8 @@ function Home() {
 
 function ArticlePage() {
   const { slug } = useParams()
-  const { articles, loading } = useArticles()
-  const a = articles.find((x) => x.slug === slug)
+  const [a, setA] = useState<PublicArticle | null>(null); const [loading, setLoading] = useState(true); const [related, setRelated] = useState<PublicArticle[]>([])
+  useEffect(() => { let live = true; setLoading(true); setA(null); setRelated([]); fetchArticleBySlug(slug ?? '').then((found) => { if (!live) return; const visible = found && isDuePublished(found.status, found.scheduled_at) ? found : null; const article = visible ?? (ARTICLES.find((x) => x.slug === slug) as PublicArticle | undefined) ?? null; setA(article); if (article) fetchRelatedArticles(article.category, article.slug).then((list) => { if (live) setRelated(list) }).catch(() => {}) }).catch(() => { if (live) setA((ARTICLES.find((x) => x.slug === slug) as PublicArticle | undefined) ?? null) }).finally(() => { if (live) setLoading(false) }); return () => { live = false } }, [slug])
   useSeo(loading && !a ? 'Loading...' : a ? a.title : 'Article not found', a ? a.description : 'This article could not be found.')
   useEffect(() => {
     if (!a) return
@@ -186,7 +186,7 @@ function ArticlePage() {
   }, [a?.slug])
   if (loading && !a) return (<div className="flex flex-col items-center justify-center py-16"><div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-[#C8102E]" /><p className="mt-4 text-[#6B7280]">Loading...</p></div>); if (!a) return (<div><h1 className="text-3xl font-bold">Article not found</h1><p className="mt-3"><Link to="/" className="text-[#C8102E] underline">Back to home</Link></p></div>)
   const cat = categoryBySlug(a.category)
-  const related = articles.filter((x) => x.category === a.category && x.slug !== a.slug)
+  // Related articles are fetched in the effect above with fetchRelatedArticles.
   const words = countWords(a.content.join(' '))
   const readMinutes = Math.max(1, Math.ceil(words / 200))
   return (
