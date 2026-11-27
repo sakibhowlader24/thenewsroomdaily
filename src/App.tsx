@@ -79,7 +79,7 @@ const relativeDay = (s: string): string => { const d = new Date(s); if (Number.i
         </h3>
         <p className="text-[#6B7280] mt-2 line-clamp-1">{a.excerpt}</p>
         <span className="flex items-end justify-between gap-3">
-          <p className="text-sm text-[#6B7280] mt-3">{a.date} | The Newsroom Daily{a.views > 0 ? ` \u00B7 ${a.views} views` : ''}</p>
+          <p className="text-sm text-[#6B7280] mt-3">{relativeDay(a.date)} | The Newsroom Daily{a.views > 0 ? ` \u00B7 ${a.views} views` : ''}</p>
           <button onClick={() => { if (articleId != null) toggleSaved(articleId) }} disabled={articleId == null} className="shrink-0 border rounded-full px-3 py-1 text-xs font-bold hover:border-[#C8102E] hover:text-[#C8102E]">{saved ? 'Saved' : 'Save'}</button>
         </span>
       </div>
