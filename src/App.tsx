@@ -167,24 +167,7 @@ function Layout({ children }: { children: ReactNode }) {
       </header>
       <div className="border-t-2 border-[#C8102E]" />
       <main className="max-w-5xl mx-auto px-4 py-6 md:py-8">{children}</main>
-      <footer className="bg-[#0F2A44] text-gray-300 dark:bg-[#081524] dark:text-slate-300 print:hidden">
-        <div className="max-w-5xl mx-auto px-4 pt-6 md:pt-8">
-          <div className="max-w-md">
-            <p className="font-serif text-xl font-bold text-white">Newsletter</p>
-            <NewsletterForm tone="light" />
-          </div>
-        </div>
-        <div className="max-w-5xl mx-auto px-4 py-6 text-sm flex flex-wrap gap-3 justify-between md:py-8 md:gap-6">
-          <p>{SITE_NAME} | Clear, practical guides for everyday readers.</p>
-          <p className="flex gap-4">
-            <Link to="/about" className="hover:text-white">About</Link>
-            <Link to="/contact" className="hover:text-white">Contact</Link>
-            <Link to="/privacy" className="hover:text-white">Privacy Policy</Link>
-            <Link to="/saved" className="hover:text-white">Saved</Link>
-            <Link to="/admin" className="hover:text-white">Admin</Link>
-          </p>
-        </div>
-      </footer>
+      <footer className="bg-[#0F2A44] text-gray-300 dark:bg-[#081524] dark:text-slate-300 print:hidden"><div className="max-w-5xl mx-auto px-4 py-6 md:py-8"><div className="grid gap-6 md:grid-cols-3"><div><p className="font-serif text-lg font-bold text-white">Categories</p><ul className="mt-2 space-y-1 text-sm">{CATEGORIES.map((c) => (<li key={c.slug}><Link to={'/category/' + c.slug} className="hover:text-white">{c.name}</Link></li>))}</ul></div><div><p className="font-serif text-lg font-bold text-white">About</p><ul className="mt-2 space-y-1 text-sm"><li><Link to="/about" className="hover:text-white">About</Link></li><li><Link to="/contact" className="hover:text-white">Contact</Link></li><li><Link to="/privacy" className="hover:text-white">Privacy</Link></li></ul></div><div><p className="font-serif text-lg font-bold text-white">Follow</p><p className="mt-3 flex gap-3"><span title="Coming soon" aria-label="X (coming soon)" className="w-9 h-9 flex items-center justify-center rounded-full border border-white/40 text-white"><svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg></span><span title="Coming soon" aria-label="Facebook (coming soon)" className="w-9 h-9 flex items-center justify-center rounded-full border border-white/40 text-white"><svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" /></svg></span><span title="Coming soon" aria-label="YouTube (coming soon)" className="w-9 h-9 flex items-center justify-center rounded-full border border-white/40 text-white"><svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" /></svg></span></p></div></div><p className="mt-6 pt-4 border-t border-white/15 text-xs text-slate-400">© {new Date().getFullYear()} {SITE_NAME} | Clear, practical guides for everyday readers.</p></div></footer>
     </div>
   )
 }
