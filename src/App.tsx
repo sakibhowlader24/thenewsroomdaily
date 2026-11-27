@@ -69,7 +69,7 @@ function ArticleCard({ a }: { a: PublicArticle }) {
     <article className="bg-white border rounded-lg overflow-hidden shadow-sm dark:bg-[#122840] dark:border-[#24405E]">
       {a.cover && (
         <Link to={articleUrl(a)} aria-label={a.title}>
-          <img src="{a.cover}" alt="{a.cover_alt || a.title}" loading="lazy" className="w-full aspect-video object-cover" />
+          <img src={a.cover} alt={a.cover_alt || a.title} loading="lazy" className="w-full aspect-video object-cover" />
         </Link>
   )}
       <div className="p-5">
