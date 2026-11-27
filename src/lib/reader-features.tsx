@@ -4,6 +4,7 @@ import {
   articleUrl,
   fetchArticleFeedbackCounts,
   submitArticleFeedback,
+  submitArticleCorrection,
   subscribeNewsletter,
   type PublicArticle,
 } from './supabase'
@@ -239,6 +240,76 @@ export function ArticleFeedback({ articleId }: { articleId: number }) {
       )}
       <p data-testid="feedback-counts" className="mt-2 text-sm text-[#6B7280] dark:text-slate-400">{helpfulText}{notHelpfulCount > 0 ? ' | ' + notHelpfulCount + (notHelpfulCount === 1 ? ' reader did not find it helpful' : ' readers did not find it helpful') : ''}</p>
       {error && <p role="alert" className="mt-2 text-sm text-red-600 dark:text-red-400">{error}</p>}
+    </section>
+  )
+}
+
+// ---- Report an error (moderated corrections, article pages) ----
+export function ReportCorrectionForm({ articleId }: { articleId: number }) {
+  const [open, setOpen] = useState(false)
+  const [wrongText, setWrongText] = useState('')
+  const [correction, setCorrection] = useState('')
+  const [sourceUrl, setSourceUrl] = useState('')
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [error, setError] = useState('')
+  const [done, setDone] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const submit = async (e: FormEvent) => {
+    e.preventDefault()
+    setError('')
+    if (!wrongText.trim()) { setError('Paste the line that is wrong.'); return }
+    if (!correction.trim()) { setError('Tell us what the correct information is.'); return }
+    if (!sourceUrl.trim()) { setError('A source link is required. Paste a link that supports the correction.'); return }
+    let parsed: URL | null = null
+    try { parsed = new URL(sourceUrl.trim()) } catch { parsed = null }
+    if (!parsed || (parsed.protocol !== 'http:' && parsed.protocol !== 'https:')) { setError('Enter a valid source link starting with http:// or https://'); return }
+    setSaving(true)
+    const result = await submitArticleCorrection({ article_id: articleId, wrong_text: wrongText, correction, source_url: sourceUrl, name, email })
+    setSaving(false)
+    if (!result.ok) { setError(result.error || 'Could not send your correction. Please try again.'); return }
+    setDone(true)
+  }
+  return (
+    <section data-testid="report-error" aria-label="Report an error" className="mt-8 rounded-lg border border-gray-200 bg-white p-5 shadow-sm dark:border-[#24405E] dark:bg-[#122840] print-hidden">
+      <h2 className="font-serif text-xl font-bold text-[#0F2A44] dark:text-white">Report an error</h2>
+      <p className="mt-1 text-sm text-[#6B7280] dark:text-slate-400">Spotted a mistake? Tell us what is wrong. Corrections are reviewed before anything changes.</p>
+      {done ? (
+        <p role="status" data-testid="report-error-success" className="mt-3 rounded border border-green-300 bg-green-100 p-3 text-sm font-bold text-green-800 dark:border-green-800 dark:bg-green-950 dark:text-green-100">Thanks! Your correction has been submitted for review. Nothing changes on the article until the owner checks it.</p>
+      ) : open ? (
+        <form data-testid="report-error-form" onSubmit={submit} className="mt-4 space-y-4">
+          <div>
+            <label className="block text-sm font-bold text-[#0F2A44] dark:text-slate-100">Which part is wrong?</label>
+            <textarea data-testid="report-error-wrong" rows={3} value={wrongText} onChange={(e) => setWrongText(e.target.value)} placeholder="Paste the wrong line from the article" className="mt-1 w-full rounded border border-gray-300 bg-white p-3 text-sm text-[#1F2937] dark:border-[#24405E] dark:bg-[#122840] dark:text-slate-100" />
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-[#0F2A44] dark:text-slate-100">What is the correct information?</label>
+            <textarea data-testid="report-error-correction" rows={3} value={correction} onChange={(e) => setCorrection(e.target.value)} placeholder="Write the correct information" className="mt-1 w-full rounded border border-gray-300 bg-white p-3 text-sm text-[#1F2937] dark:border-[#24405E] dark:bg-[#122840] dark:text-slate-100" />
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-[#0F2A44] dark:text-slate-100">Source link (required)</label>
+            <input data-testid="report-error-source" type="url" value={sourceUrl} onChange={(e) => setSourceUrl(e.target.value)} placeholder="https://example.com/source" className="mt-1 w-full rounded border border-gray-300 bg-white p-3 text-sm text-[#1F2937] dark:border-[#24405E] dark:bg-[#122840] dark:text-slate-100" />
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <label className="block text-sm font-bold text-[#0F2A44] dark:text-slate-100">Name (optional)</label>
+              <input data-testid="report-error-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" className="mt-1 w-full rounded border border-gray-300 bg-white p-3 text-sm text-[#1F2937] dark:border-[#24405E] dark:bg-[#122840] dark:text-slate-100" />
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-[#0F2A44] dark:text-slate-100">Email (optional)</label>
+              <input data-testid="report-error-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" className="mt-1 w-full rounded border border-gray-300 bg-white p-3 text-sm text-[#1F2937] dark:border-[#24405E] dark:bg-[#122840] dark:text-slate-100" />
+            </div>
+          </div>
+          {error && <p role="alert" data-testid="report-error-error" className="rounded border border-red-300 bg-red-100 p-3 text-sm text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-100">{error}</p>}
+          <p className="text-xs text-[#6B7280] dark:text-slate-400">Corrections are reviewed before anything changes. Nothing you submit changes the article directly.</p>
+          <span className="flex flex-wrap gap-2">
+            <button type="submit" disabled={saving} className="rounded bg-[#C8102E] px-4 py-2 text-sm font-bold text-white hover:bg-[#A50D26] disabled:opacity-60">{saving ? 'Sending...' : 'Send correction'}</button>
+            <button type="button" onClick={() => setOpen(false)} className="rounded border border-[#0F2A44]/20 px-4 py-2 text-sm font-bold text-[#0F2A44] hover:border-[#C8102E] hover:text-[#C8102E] dark:border-[#24405E] dark:text-slate-100 dark:hover:border-[#C8102E] dark:hover:text-white">Cancel</button>
+          </span>
+        </form>
+      ) : (
+        <button type="button" data-testid="report-error-button" onClick={() => setOpen(true)} className="mt-3 rounded border border-[#C8102E] px-4 py-2 text-sm font-bold text-[#C8102E] hover:bg-[#C8102E] hover:text-white dark:text-white">Report an error</button>
+      )}
     </section>
   )
 }
