@@ -120,34 +120,34 @@ function Layout({ children }: { children: ReactNode }) {
   }, [location.pathname, location.search])
   return (
     <div className="min-h-screen">
-      <header className="bg-white text-[#0F2A44] dark:bg-[#0D2138] dark:text-slate-100 print:hidden">
+      <header className="sticky top-0 z-40 bg-[#0F2A44] text-white dark:bg-[#081524] dark:text-slate-100 print:hidden">
         <div className="max-w-5xl mx-auto px-4">
           <div className="flex items-center justify-between gap-2">
             <button className="md:hidden w-9 h-9 shrink-0 flex items-center justify-center -ml-1" aria-label={menuOpen ? 'Close menu' : 'Open menu'} aria-expanded={menuOpen} onClick={() => { setMenuOpen(!menuOpen); setSearchOpen(false) }}>
               <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
             </button>
             <Link to="/" className="text-center py-3 md:py-4 hover:opacity-90 min-w-0" aria-label="The Newsroom Daily home">
-              <span className="block font-serif font-black text-[1.7rem] md:text-4xl leading-none tracking-tight text-[#0F2A44] dark:text-white">The Newsroom</span>
+              <span className="block font-serif font-black text-4xl md:text-5xl leading-none tracking-tight text-white">The Newsroom</span>
               <span className="mt-1 flex items-center justify-center gap-2 text-[#C8102E] font-black tracking-[0.35em] md:tracking-[0.45em] text-xs md:text-sm">DAILY <span className="inline-block w-3 h-3 bg-[#C8102E]" aria-hidden="true" /></span>
             </Link>
             <span className="flex items-center gap-1.5 shrink-0">
-              <button type="button" className="md:hidden w-9 h-9 flex items-center justify-center rounded-full border border-gray-300 hover:border-[#C8102E] hover:text-[#C8102E] dark:border-[#24405E] dark:hover:border-[#C8102E]" aria-label={searchOpen ? 'Close search' : 'Open search'} aria-expanded={searchOpen} onClick={() => { setSearchOpen(!searchOpen); setMenuOpen(false) }}>
+              <button type="button" className="w-9 h-9 flex items-center justify-center rounded-full border border-white/50 text-white hover:border-[#C8102E] hover:text-[#C8102E] dark:border-[#24405E] dark:hover:border-[#C8102E]" aria-label={searchOpen ? 'Close search' : 'Open search'} aria-expanded={searchOpen} onClick={() => { setSearchOpen(!searchOpen); setMenuOpen(false) }}>
                 <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" /></svg>
               </button>
               <button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} className="w-9 h-9 md:w-auto md:h-auto md:p-2 flex items-center justify-center rounded-full border border-gray-300 hover:border-[#C8102E] hover:text-[#C8102E] dark:border-[#24405E] dark:hover:border-[#C8102E]">{theme === 'dark' ? '\u2600\uFE0F' : '\uD83C\uDF19'}</button>
             </span>
           </div>
-          <nav className="hidden md:flex flex-wrap items-center gap-4 text-sm font-bold md:gap-6 md:justify-center pb-3 md:pb-4">
-            <Link to="/" className="menu-link">Home</Link>
+          <nav className="hidden md:flex flex-wrap items-center justify-center gap-6 md:gap-8 pb-3 md:pb-4 text-xs font-bold uppercase tracking-[0.25em] text-white">
+            {/* */}
             {CATEGORIES.map((c) => (<Link key={c.slug} to={'/category/' + c.slug} className="menu-link">{c.name}</Link>))}
-            <Link to="/about" className="menu-link">About</Link>
-            <Link to="/contact" className="menu-link">Contact</Link>
-            <Link to="/saved" className="menu-link">Saved</Link>
+            {/* */}
+            {/* */}
+            {/* */}
           </nav>
-          <form className="hidden md:flex gap-0 pb-4" role="search" action="/search" method="get">
+          {searchOpen && (<form className="hidden md:flex gap-0 pb-4" role="search" action="/search" method="get">
             <SearchBox />
             <button className="bg-[#C8102E] text-white font-bold px-4 rounded-r">Search</button>
-          </form>
+          </form>)}
           {searchOpen && (
             <div className="md:hidden pb-4">
               <SearchBox />
