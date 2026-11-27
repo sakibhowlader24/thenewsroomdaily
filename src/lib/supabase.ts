@@ -108,7 +108,7 @@ export function rowToArticle(row: ArticleRow): PublicArticle {
   }
 }
 
-export function articleToRow(a: PublicArticle): Omit<ArticleRow, 'id'> {
+export function articleToRow(a: PublicArticle): Omit<ArticleRow, 'id' | 'corrected_at'> & { corrected_at?: string | null } {
   return {
     slug: a.slug,
     title: a.title,
