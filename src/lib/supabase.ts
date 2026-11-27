@@ -54,6 +54,38 @@ export function isDuePublished(
   return false
 }
 
+// Article dates are shown in US format, e.g. "November 25, 2026". Only the
+// date part of published_at is used, so a midnight UTC timestamp never shifts
+// to the previous day for readers in US time zones.
+export function formatUsDate(value: string | null | undefined): string {
+  if (!value) return ''
+  const parts = value.slice(0, 10).split('-')
+  const year = Number(parts[0])
+  const month = Number(parts[1])
+  const day = Number(parts[2])
+  if (!year || !month || !day) return ''
+  return new Date(year, month - 1, day).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+}
+
+// Convert a display date ("November 25, 2026") or an ISO date ("2026-11-25")
+// back to the ISO date the articles table stores, so the Admin editor and
+// articleToRow never write a display date to Supabase.
+export function displayDateToIso(date: string): string {
+  if (!date) return ''
+  if (/^\d{4}-\d{2}-\d{2}/.test(date)) return date.slice(0, 10)
+  const parsed = new Date(date)
+  if (Number.isNaN(parsed.getTime())) return ''
+  const month = String(parsed.getMonth() + 1).padStart(2, '0')
+  const day = String(parsed.getDate()).padStart(2, '0')
+  return parsed.getFullYear() + '-' + month + '-' + day
+}
+
+// Full published_at value to store for an article date.
+export function toStoredPublishedAt(date: string): string | null {
+  const isoDate = displayDateToIso(date)
+  return isoDate ? isoDate + 'T00:00:00Z' : null
+}
+
 export function rowToArticle(row: ArticleRow): PublicArticle {
   return {
     id: row.id,
@@ -61,7 +93,7 @@ export function rowToArticle(row: ArticleRow): PublicArticle {
     title: row.title,
     description: row.meta_description || row.excerpt || '',
     category: row.category,
-    date: row.published_at ? row.published_at.slice(0, 10) : '',
+    date: formatUsDate(row.published_at),
     author: SITE_NAME,
     excerpt: row.excerpt || '',
     content: row.content ? row.content.split(/\n\s*\n/).filter(Boolean) : [],
@@ -83,7 +115,7 @@ export function articleToRow(a: PublicArticle): Omit<ArticleRow, 'id'> {
     excerpt: a.excerpt,
     content: a.content.join('\n\n'),
     meta_description: a.description,
-    published_at: a.date ? a.date + 'T00:00:00Z' : null,
+    published_at: toStoredPublishedAt(a.date),
     cover_image: a.cover || null,
     status: a.status || 'published',
     is_featured: a.is_featured ?? false,
@@ -127,8 +159,8 @@ export async function fetchArticleById(id: number): Promise<PublicArticle | null
   return rowToArticle(data as ArticleRow)
 }
 
-// Related articles for an article page: only the light fields ArticleCard needs, at most 4. 
-export async function fetchRelatedArticles(category: string, excludeSlug: string): Promise<PublicArticle[]> { const seed = (ARTICLES as PublicArticle[]).filter((a) => a.category === category && a.slug !== excludeSlug).slice(0, 4); if (!supabase) return seed; const { data, error } = await supabase.from('articles').select('id, slug, title, cover_image, category, published_at').eq('category', category).neq('slug', excludeSlug).eq('status', 'published').is('deleted_at', null).order('published_at', { ascending: false }).limit(4); if (error || !data) return seed; return (data as { id: number; slug: string; title: string; cover_image: string | null; category: string; published_at: string | null }[]).map((r) => ({ id: r.id, slug: r.slug, title: r.title, description: '', category: r.category, date: r.published_at ? r.published_at.slice(0, 10) : '', author: SITE_NAME, excerpt: '', content: [], cover: r.cover_image || undefined, status: 'published', is_featured: false, views: 0 })) } // Admin read: every article row (including Drafts, Scheduled and trashed ones).
+// Related articles for an article page: only the light fields ArticleCard needs, at most 4.
+export async function fetchRelatedArticles(category: string, excludeSlug: string): Promise<PublicArticle[]> { const seed = (ARTICLES as PublicArticle[]).filter((a) => a.category === category && a.slug !== excludeSlug).slice(0, 4); if (!supabase) return seed; const { data, error } = await supabase.from('articles').select('id, slug, title, cover_image, category, published_at').eq('category', category).neq('slug', excludeSlug).eq('status', 'published').is('deleted_at', null).order('published_at', { ascending: false }).limit(4); if (error || !data) return seed; return (data as { id: number; slug: string; title: string; cover_image: string | null; category: string; published_at: string | null }[]).map((r) => ({ id: r.id, slug: r.slug, title: r.title, description: '', category: r.category, date: formatUsDate(r.published_at), author: SITE_NAME, excerpt: '', content: [], cover: r.cover_image || undefined, status: 'published', is_featured: false, views: 0 })) } // Admin read: every article row (including Drafts, Scheduled and trashed ones).
 export async function fetchAllArticles(): Promise<ArticleRow[]> {
   if (!supabase) return []
   const { data, error } = await supabase.from('articles').select('*').order('published_at', { ascending: false })
