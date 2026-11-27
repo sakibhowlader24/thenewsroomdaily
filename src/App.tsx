@@ -17,6 +17,7 @@ const Admin = lazy(() => import('./pages/Admin'))
 
 const THEME_KEY = 'newsroom-theme'
 type Theme = 'light' | 'dark'
+
 function getInitialTheme(): Theme {
   if (typeof window === 'undefined') return 'light'
   if (document.documentElement.classList.contains('dark')) return 'dark'
@@ -391,7 +392,7 @@ function ArticlePage() {
 }
 
 function AboutPage() {
-  useSeo('About', 'The Newsroom Daily is a clean, fast news site with clear, practical guides on gaming, tech how-to, money and finance, career and work, and everyday guides.')
+  useSeo('About', 'The Newsroom Daily is a clean, fast news site with clear, practical guides on gaming, tech, money, career and everyday life.')
   return (
     <div>
       <h1 className="text-3xl font-black">About The Newsroom Daily</h1>
@@ -417,17 +418,17 @@ function ContactPage() {
 }
 
 function PrivacyPage() {
-  useSeo('Privacy Policy', 'How The Newsroom Daily handles reader data: bookmarks stay in your browser, and newsletter, feedback and correction data is kept only to run those features.')
+  useSeo('Privacy Policy', 'How The Newsroom Daily handles reader data: bookmarks stay in your browser, and the newsletter only stores the email you choose to share.')
   return (
     <div>
       <h1 className="text-3xl font-black">Privacy Policy</h1>
       <p className="text-sm text-[#6B7280] mt-2">Last updated: November 25, 2026</p>
       <div className="mt-4 space-y-4 leading-relaxed bg-white border rounded-lg p-6 shadow-sm dark:bg-[#122840] dark:border-[#24405E]">
-        <p>The Newsroom Daily collects as little as possible. Bookmarks are stored only in your browser, and they never leave your device.</p>
-        <p>If you subscribe to the newsletter, we store only the email address you enter, and only to send you the guides you asked for. You can unsubscribe at any time.</p>
-        <p>If you vote on whether an article was helpful, we store only your answer and the article, with no name or email.</p>
-        <p>If you report a correction, we store the wrong line, the suggested correction, the source link, and any name or email you choose to share, only so we can review it.</p>
-        <p>Contact us at <a href="mailto:rtvsakib@gmail.com" className="text-[#C8102E] underline">rtvsakib@gmail.com</a>.</p>
+        <p>The Newsroom Daily collects as little as possible. Bookmarks are stored only in your browser, and reading progress is not sent to us.</p>
+        <p>If you subscribe to the newsletter, we store only the email address you enter, and only to send you our guides. We do not sell or share it.</p>
+        <p>If you vote on whether an article was helpful, we store only your answer and the article, with no name or email attached.</p>
+        <p>If you report a correction, we store the wrong line, the suggested correction, the source link, and any name or email you choose to share, only so we can review the report.</p>
+        <p>Contact us at <a href="mailto:rtvsakib@gmail.com" className="text-[#C8102E] underline">rtvsakib@gmail.com</a> with any privacy question.</p>
       </div>
     </div>
   )
