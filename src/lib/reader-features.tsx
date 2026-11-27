@@ -1,4 +1,4 @@
-import { useEffect, useId, useState, type FormEvent } from 'react'
+import { useEffect, useId, useRef, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import {
   articleUrl,
@@ -73,32 +73,42 @@ type ListenStatus = 'idle' | 'playing' | 'paused'
 export function ListenControl({ text, title }: { text: string; title: string }) {
   const [status, setStatus] = useState<ListenStatus>('idle')
   const [supported, setSupported] = useState(false)
+  const startTimer = useRef<number | null>(null)
   useEffect(() => {
     setSupported('speechSynthesis' in window && 'SpeechSynthesisUtterance' in window)
     return () => {
+      if (startTimer.current !== null) window.clearTimeout(startTimer.current)
       if ('speechSynthesis' in window) window.speechSynthesis.cancel()
     }
   }, [])
   const stop = () => {
+    if (startTimer.current !== null) window.clearTimeout(startTimer.current)
     if ('speechSynthesis' in window) window.speechSynthesis.cancel()
     setStatus('idle')
   }
   const start = () => {
     if (!('speechSynthesis' in window)) return
-    window.speechSynthesis.cancel()
-    const utterance = new SpeechSynthesisUtterance(title + '. ' + text)
-    utterance.lang = 'en-US'
-    utterance.rate = 1
-    const voices = window.speechSynthesis.getVoices()
-    const voice =
-      voices.find((v) => v.lang === 'en-US') ||
-      voices.find((v) => v.lang.startsWith('en-US')) ||
-      voices.find((v) => v.lang.startsWith('en'))
-    if (voice) utterance.voice = voice
-    utterance.onend = () => setStatus('idle')
-    utterance.onerror = () => setStatus('idle')
-    window.speechSynthesis.speak(utterance)
-    setStatus('playing')
+    const synth = window.speechSynthesis
+    synth.cancel()
+    const startedAt = Date.now()
+    startTimer.current = window.setTimeout(() => {
+      const utterance = new SpeechSynthesisUtterance(title + '. ' + text)
+      utterance.lang = 'en-US'
+      utterance.rate = 1
+      const voices = synth.getVoices()
+      const voice =
+        voices.find((v) => v.lang === 'en-US') ||
+        voices.find((v) => v.lang.startsWith('en-US')) ||
+        voices.find((v) => v.lang.startsWith('en'))
+      if (voice) utterance.voice = voice
+      const finish = () => {
+        if (Date.now() - startedAt > 1000) setStatus('idle')
+      }
+      utterance.onend = finish
+      utterance.onerror = finish
+      synth.speak(utterance)
+      setStatus('playing')
+    }, 100)
   }
   const pause = () => {
     window.speechSynthesis.pause()
