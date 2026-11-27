@@ -33,7 +33,7 @@ export interface ArticleRow {
 
 // Public article shape: the seed Article plus the Phase 2 fields the site shows.
 export type PublicArticle = Article & {
-  id: number
+  id?: number
   is_featured: boolean
   views: number
   scheduled_at?: string
@@ -128,7 +128,7 @@ export async function fetchArticleById(id: number): Promise<PublicArticle | null
 }
 
 // Related articles for an article page: only the light fields ArticleCard needs, at most 4. 
-export async function fetchRelatedArticles(category: string, excludeSlug: string): Promise<PublicArticle[]> { const seed = (ARTICLES as PublicArticle[]).filter((a) => a.category === category && a.slug !== excludeSlug).slice(0, 4); if (!supabase) return seed; const { data, error } = await supabase.from('articles').select(id, 'slug, title, cover_image, category, published_at').eq('category', category).neq('slug', excludeSlug).eq('status', 'published').is('deleted_at', null).order('published_at', { ascending: false }).limit(4); if (error || !data) return seed; return (data as { id: number; slug: string; title: string; cover_image: string | null; category: string; published_at: string | null }[]).map((r) => ({ id: r.id, slug: r.slug, title: r.title, description: '', category: r.category, date: r.published_at ? r.published_at.slice(0, 10) : '', author: SITE_NAME, excerpt: '', content: [], cover: r.cover_image || undefined, status: 'published', is_featured: false, views: 0 })) } // Admin read: every article row (including Drafts, Scheduled and trashed ones).
+export async function fetchRelatedArticles(category: string, excludeSlug: string): Promise<PublicArticle[]> { const seed = (ARTICLES as PublicArticle[]).filter((a) => a.category === category && a.slug !== excludeSlug).slice(0, 4); if (!supabase) return seed; const { data, error } = await supabase.from('articles').select('id, slug, title, cover_image, category, published_at').eq('category', category).neq('slug', excludeSlug).eq('status', 'published').is('deleted_at', null).order('published_at', { ascending: false }).limit(4); if (error || !data) return seed; return (data as { id: number; slug: string; title: string; cover_image: string | null; category: string; published_at: string | null }[]).map((r) => ({ id: r.id, slug: r.slug, title: r.title, description: '', category: r.category, date: r.published_at ? r.published_at.slice(0, 10) : '', author: SITE_NAME, excerpt: '', content: [], cover: r.cover_image || undefined, status: 'published', is_featured: false, views: 0 })) } // Admin read: every article row (including Drafts, Scheduled and trashed ones).
 export async function fetchAllArticles(): Promise<ArticleRow[]> {
   if (!supabase) return []
   const { data, error } = await supabase.from('articles').select('*').order('published_at', { ascending: false })
