@@ -52,7 +52,7 @@ function ArticleCard({ a }: { a: PublicArticle }) {
         {cat ? cat.name : a.category}
         {a.is_featured && (<span className="ml-2 bg-[#C8102E] text-white px-2 py-0.5 rounded normal-case tracking-normal">Featured</span>)}
       </p>
-      <h3 className="text-xl font-bold mt-2 leading-snug"><Link to={articleUrl(a)} className="hover:underline">{a.title}</Link>Link></h3>h3></h3>
+      <h3 className="text-xl font-bold mt-2 leading-snug"><Link to={articleUrl(a)} className="hover:underline">{a.title}</Link></h3>
       <p className="text-[#6B7280] mt-2">{a.excerpt}</p>
       <p className="text-sm text-[#6B7280] mt-3">{a.date} | {a.author}{a.views > 0 ? ' | ' + a.views + ' views' : ''}</p>
     </article>
@@ -134,10 +134,10 @@ function Home() {
       {latest && (
         <section className="bg-white border rounded-lg p-5 shadow-sm mb-8 md:p-6 md:mb-10">
           <p className="text-xs font-bold uppercase tracking-wide text-[#C8102E]">Latest article</p>
-          <h1 className="text-3xl md:text-4xl font-black mt-2 leading-tight"><Link to={articleUrl(latest)} className="hover:underline">{latest.title}</Link>Link></h1>h1></h1>
+          <h1 className="text-3xl md:text-4xl font-black mt-2 leading-tight"><Link to={articleUrl(latest)} className="hover:underline">{latest.title}</Link></h1>
           <p className="text-[#6B7280] mt-3 text-lg">{latest.excerpt}</p>
           <p className="text-sm text-[#6B7280] mt-3">{latest.date} | {latest.author}</p>
-          <Link to={articleUrl(latest)} className="inline-block mt-4 bg-[#C8102E] text-white font-bold px-4 py-2 rounded">Read the guide</Link>
+          <Link to={articleUrl(latest)} className="inline-block mt-4 bg-[#C8102E] text-white font-bold px-4 py-2 rounded">Read the guide →</Link>
         </section>
       )}
       {featured.length > 0 && (
