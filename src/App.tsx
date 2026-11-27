@@ -335,14 +335,14 @@ function ArticlePage() {
         <nav aria-label="Table of contents" className="mt-6 bg-white border rounded-lg p-5 shadow-sm dark:bg-[#122840] dark:border-[#24405E] print-hidden">
           <h2 className="font-bold">On this page</h2>
           <ul className="mt-2 space-y-1">
-            {toc.map((t) => (<li key={t.anchor}><a href={'#' + t.anchor} className="text-[#C8102E] hover:underline">{t.text}</a></li>))}
+            {toc.map((t) => (<li key={t.id}><a href={'#' + t.id} className="text-[#C8102E] hover:underline">{t.label}</a></li>))}
           </ul>
         </nav>
       )}
       {a.cover && (<img src={a.cover} alt={a.cover_alt || a.title} className="w-full rounded-lg mt-6 print:hidden" />)}
       <div data-testid="article-body" data-font-size={fontSize} style={{ fontSize: ARTICLE_FONT_SIZE_PX[fontSize] }} className="mt-6 space-y-4 leading-relaxed bg-white border rounded-lg p-6 shadow-sm dark:bg-[#122840] dark:border-[#24405E]">
         {a.content.map((block, i) => {
-          if (block.startsWith('## ')) return <h2 key={i} id={blockAnchorId(block)} className="text-2xl font-bold mt-2 scroll-mt-24">{block.slice(3)}</h2>
+          if (block.startsWith('## ')) return <h2 key={i} id={blockAnchorId(a.content, i)} className="text-2xl font-bold mt-2 scroll-mt-24">{block.slice(3)}</h2>
           return <p key={i}>{block}</p>
         })}
       </div>
