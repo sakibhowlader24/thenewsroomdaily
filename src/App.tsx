@@ -207,7 +207,7 @@ function Home() {
       {loading && <p className="text-[#6B7280]">Loading articles...</p>}
       {latest && (
         <section className="bg-white border rounded-lg shadow-sm mb-8 md:mb-10 overflow-hidden dark:bg-[#122840] dark:border-[#24405E]">
-          {latest.cover && (<img src={latest.cover} alt={latest.cover_alt || latest.title} className="w-full aspect-video object-cover" />)}
+          {latest.cover && (<img src={latest.cover} alt={latest.cover_alt || latest.title} className="w-full aspect-video md:aspect-auto md:h-[440px] object-cover" />)}
           <div className="p-6">
             <p className="text-xs font-bold tracking-widest text-[#C8102E]">LATEST ARTICLE</p>
             <h1 className="text-3xl md:text-4xl font-black mt-2 leading-tight"><Link to={articleUrl(latest)} className="hover:text-[#C8102E] hover:underline">{latest.title}</Link></h1>
