@@ -336,6 +336,7 @@ export default function App() {
           <Route path="/article/:slug" element={<LegacyArticleRedirect />} />
           <Route path="/category/:slug" element={<CategoryPage />} />
           <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/admin" element={<Suspense fallback={<div className="text-center py-16"><p className="text-[#6B7280] dark:text-slate-400">Loading admin...</p></div>}><Admin /></Suspense>} />
           <Route path="*" element={<Navigate to="/" replace />} />
