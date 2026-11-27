@@ -66,16 +66,23 @@ function ArticleCard({ a }: { a: PublicArticle }) {
   const articleId = a.id
   const saved = articleId != null && isSaved(articleId)
   return (
-    <article className="bg-white border rounded-lg p-5 shadow-sm dark:bg-[#122840] dark:border-[#24405E]">
-      <p className="text-xs font-bold tracking-wide text-[#C8102E]">{cat?.name.toUpperCase()}</p>
-      <h3 className="text-xl font-bold mt-2 leading-snug">
-        <Link to={articleUrl(a)} className="hover:text-[#C8102E] hover:underline">{a.title}</Link>
-      </h3>
-      <p className="text-[#6B7280] mt-2">{a.excerpt}</p>
-      <span className="flex items-end justify-between gap-3">
-        <p className="text-sm text-[#6B7280] mt-3">{a.date} | The Newsroom Daily{a.views > 0 ? ` \u00B7 ${a.views} views` : ''}</p>
-        <button onClick={() => { if (articleId != null) toggleSaved(articleId) }} disabled={articleId == null} className="shrink-0 border rounded-full px-3 py-1 text-xs font-bold hover:border-[#C8102E] hover:text-[#C8102E]">{saved ? 'Saved' : 'Save'}</button>
-      </span>
+    <article className="bg-white border rounded-lg overflow-hidden shadow-sm dark:bg-[#122840] dark:border-[#24405E]">
+      {a.cover && (
+        <Link to={articleUrl(a)} aria-label={a.title}>
+          <img src="{a.cover}" alt="{a.cover_alt || a.title}" loading="lazy" className="w-full aspect-video object-cover" />
+        </Link>
+  )}
+      <div className="p-5">
+        <p className="text-xs font-bold tracking-wide text-[#C8102E]">{cat?.name.toUpperCase()}</p>
+        <h3 className="text-xl font-bold mt-2 leading-snug">
+          <Link to={articleUrl(a)} className="hover:text-[#C8102E] hover:underline">{a.title}</Link>
+        </h3>
+        <p className="text-[#6B7280] mt-2">{a.excerpt}</p>
+        <span className="flex items-end justify-between gap-3">
+          <p className="text-sm text-[#6B7280] mt-3">{a.date} | The Newsroom Daily{a.views > 0 ? ` \u00B7 ${a.views} views` : ''}</p>
+          <button onClick={() => { if (articleId != null) toggleSaved(articleId) }} disabled={articleId == null} className="shrink-0 border rounded-full px-3 py-1 text-xs font-bold hover:border-[#C8102E] hover:text-[#C8102E]">{saved ? 'Saved' : 'Save'}</button>
+        </span>
+      </div>
     </article>
   )
 }
