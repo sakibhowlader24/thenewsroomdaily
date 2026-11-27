@@ -7,11 +7,12 @@ import {
   fetchArticleById, articleUrl,
   incrementArticleViews,
   fetchHomepageCategories,
+  formatUsDate,
   ALL_CATEGORY_SLUGS,
   type PublicArticle,
 } from './lib/supabase'
 import { SearchBox, ShareButtons, ReadingProgressBar, BookmarkButton, useBookmarks, buildToc, blockAnchorId, searchArticles } from './lib/reader'
-import { FontSizeControl, ListenControl, PrintButton, ArticleFeedback, NewsletterForm, MostReadList, getSavedFontSize, ARTICLE_FONT_SIZE_PX, FONT_SIZE_KEY, type ArticleFontSize } from './lib/reader-features'
+import { FontSizeControl, ListenControl, PrintButton, ArticleFeedback, ReportCorrectionForm, NewsletterForm, MostReadList, getSavedFontSize, ARTICLE_FONT_SIZE_PX, FONT_SIZE_KEY, type ArticleFontSize } from './lib/reader-features'
 const Admin = lazy(() => import('./pages/Admin'))
 
 const THEME_KEY = 'newsroom-theme'
@@ -366,7 +367,9 @@ function ArticlePage() {
           return <p key={i}>{block}</p>
         })}
       </div>
+      {a.corrected_at && <p data-testid="article-corrected" className="mt-3 text-sm text-[#6B7280] dark:text-slate-400">Corrected: {formatUsDate(a.corrected_at)}</p>}
       {a.id != null && <ArticleFeedback articleId={a.id} />}
+      {a.id != null && <ReportCorrectionForm articleId={a.id} />}
       <div className="mt-6 print-hidden">
         <ShareButtons article={a} />
       </div>
@@ -412,6 +415,7 @@ function PrivacyPage() {
         <p>The Newsroom Daily collects as little as possible. Bookmarks are stored only in your browser, and reading progress is not sent to us.</p>
         <p>If you subscribe to the newsletter, we store only the email address you enter, and only to send you our guides. We do not sell or share it.</p>
         <p>If you vote on whether an article was helpful, we store only your answer and the article, with no name or email attached.</p>
+        <p>If you report a correction, we store the wrong line, the suggested correction, the source link, and the name and email you choose to share, only so we can review the report.</p>
         <p>Contact us at <a href="mailto:rtvsakib@gmail.com" className="text-[#C8102E] underline">rtvsakib@gmail.com</a> with any privacy question.</p>
       </div>
     </div>
