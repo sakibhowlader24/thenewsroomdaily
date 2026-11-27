@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useState, type ReactNode } from 'react'
-import { BrowserRouter, Routes, Route, Link, useParams, Navigate, useSearchParams } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Link, useParams, Navigate, useSearchParams, useLocation } from 'react-router-dom'
 import { ARTICLES } from './data/articles'
 import { CATEGORIES, SITE_NAME, categoryBySlug } from './data/site'
 import {
@@ -72,7 +72,7 @@ function ArticleCard({ a }: { a: PublicArticle }) {
       </h3>
       <p className="text-[#6B7280] mt-2">{a.excerpt}</p>
       <span className="flex items-end justify-between gap-3">
-        <p className="text-sm text-[#6B7280] mt-3">{a.date} | The Newsroom Daily{a.views > 0 ? ` · ${a.views} views` : ''}</p>
+        <p className="text-sm text-[#6B7280] mt-3">{a.date} | The Newsroom Daily{a.views > 0 ? ` \u00B7 ${a.views} views` : ''}</p>
         <button onClick={() => { if (articleId != null) toggleSaved(articleId) }} disabled={articleId == null} className="shrink-0 border rounded-full px-3 py-1 text-xs font-bold hover:border-[#C8102E] hover:text-[#C8102E]">{saved ? 'Saved' : 'Save'}</button>
       </span>
     </article>
@@ -100,42 +100,59 @@ function RelatedArticles({ a }: { a: PublicArticle }) {
 function Layout({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>(getInitialTheme)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
+  const location = useLocation()
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark')
     try { localStorage.setItem(THEME_KEY, theme) } catch { /* ignore */ }
   }, [theme])
+  useEffect(() => {
+    setMenuOpen(false)
+    setSearchOpen(false)
+  }, [location.pathname, location.search])
   return (
     <div className="min-h-screen">
       <header className="bg-white text-[#0F2A44] dark:bg-[#0D2138] dark:text-slate-100 print:hidden">
         <div className="max-w-5xl mx-auto px-4">
-          <div className="flex items-center justify-between gap-3">
-            <button className="md:hidden p-2 -ml-2" aria-label={menuOpen ? 'Close menu' : 'Open menu'} aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}>
+          <div className="flex items-center justify-between gap-2">
+            <button className="md:hidden w-9 h-9 shrink-0 flex items-center justify-center -ml-1" aria-label={menuOpen ? 'Close menu' : 'Open menu'} aria-expanded={menuOpen} onClick={() => { setMenuOpen(!menuOpen); setSearchOpen(false) }}>
               <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
             </button>
-            <Link to="/" className="text-center py-4 hover:opacity-90" aria-label="The Newsroom Daily home">
-              <span className="block font-serif font-black text-4xl leading-none tracking-tight text-[#0F2A44] dark:text-white">The Newsroom</span>
-              <span className="mt-1 flex items-center justify-center gap-2 text-[#C8102E] font-black tracking-[0.45em] text-sm">DAILY <span className="inline-block w-3 h-3 bg-[#C8102E]" aria-hidden="true" /></span>
+            <Link to="/" className="text-center py-3 md:py-4 hover:opacity-90 min-w-0" aria-label="The Newsroom Daily home">
+              <span className="block font-serif font-black text-[1.7rem] md:text-4xl leading-none tracking-tight text-[#0F2A44] dark:text-white">The Newsroom</span>
+              <span className="mt-1 flex items-center justify-center gap-2 text-[#C8102E] font-black tracking-[0.35em] md:tracking-[0.45em] text-xs md:text-sm">DAILY <span className="inline-block w-3 h-3 bg-[#C8102E]" aria-hidden="true" /></span>
             </Link>
-            <button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} className="p-2 rounded-full border border-gray-300 hover:border-[#C8102E] hover:text-[#C8102E] dark:border-[#24405E] dark:hover:border-[#C8102E]">{theme === 'dark' ? '☀️' : '🌙'}</button>
+            <span className="flex items-center gap-1.5 shrink-0">
+              <button type="button" className="md:hidden w-9 h-9 flex items-center justify-center rounded-full border border-gray-300 hover:border-[#C8102E] hover:text-[#C8102E] dark:border-[#24405E] dark:hover:border-[#C8102E]" aria-label={searchOpen ? 'Close search' : 'Open search'} aria-expanded={searchOpen} onClick={() => { setSearchOpen(!searchOpen); setMenuOpen(false) }}>
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" /></svg>
+              </button>
+              <button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} className="w-9 h-9 md:w-auto md:h-auto md:p-2 flex items-center justify-center rounded-full border border-gray-300 hover:border-[#C8102E] hover:text-[#C8102E] dark:border-[#24405E] dark:hover:border-[#C8102E]">{theme === 'dark' ? '\u2600\uFE0F' : '\uD83C\uDF19'}</button>
+            </span>
           </div>
-          <nav className="flex flex-wrap items-center gap-4 text-sm font-bold md:gap-6 md:justify-center pb-3 md:pb-4">
+          <nav className="hidden md:flex flex-wrap items-center gap-4 text-sm font-bold md:gap-6 md:justify-center pb-3 md:pb-4">
             <Link to="/" className="menu-link">Home</Link>
             {CATEGORIES.map((c) => (<Link key={c.slug} to={'/category/' + c.slug} className="menu-link">{c.name}</Link>))}
             <Link to="/about" className="menu-link">About</Link>
             <Link to="/contact" className="menu-link">Contact</Link>
             <Link to="/saved" className="menu-link">Saved</Link>
           </nav>
-          <form className="flex gap-0 pb-4" role="search" action="/search" method="get">
+          <form className="hidden md:flex gap-0 pb-4" role="search" action="/search" method="get">
             <SearchBox />
             <button className="bg-[#C8102E] text-white font-bold px-4 rounded-r">Search</button>
           </form>
+          {searchOpen && (
+            <div className="md:hidden pb-4">
+              <SearchBox />
+            </div>
+          )}
           {menuOpen && (
             <nav className="md:hidden pb-4 flex flex-col gap-1 text-sm font-bold" aria-label="Mobile menu">
               <Link to="/" className="menu-link" onClick={() => setMenuOpen(false)}>Home</Link>
               {CATEGORIES.map((c) => (<Link key={c.slug} to={'/category/' + c.slug} className="menu-link" onClick={() => setMenuOpen(false)}>{c.name}</Link>))}
+              <Link to="/saved" className="menu-link" onClick={() => setMenuOpen(false)}>Saved</Link>
               <Link to="/about" className="menu-link" onClick={() => setMenuOpen(false)}>About</Link>
               <Link to="/contact" className="menu-link" onClick={() => setMenuOpen(false)}>Contact</Link>
-              <Link to="/saved" className="menu-link" onClick={() => setMenuOpen(false)}>Saved</Link>
+              <Link to="/privacy" className="menu-link" onClick={() => setMenuOpen(false)}>Privacy</Link>
             </nav>
           )}
         </div>
@@ -181,12 +198,15 @@ function Home() {
     <div>
       {loading && <p className="text-[#6B7280]">Loading articles...</p>}
       {latest && (
-        <section className="bg-white border rounded-lg p-6 shadow-sm mb-8 md:mb-10 dark:bg-[#122840] dark:border-[#24405E]">
-          <p className="text-xs font-bold tracking-widest text-[#C8102E]">LATEST ARTICLE</p>
-          <h1 className="text-3xl md:text-4xl font-black mt-2 leading-tight"><Link to={articleUrl(latest)} className="hover:text-[#C8102E] hover:underline">{latest.title}</Link></h1>
-          <p className="text-[#6B7280] mt-3">{latest.excerpt}</p>
-          <p className="text-sm text-[#6B7280] mt-3">{latest.date} | The Newsroom Daily</p>
-          <Link to={articleUrl(latest)} className="inline-block mt-4 bg-[#C8102E] text-white font-bold px-4 py-2 rounded hover:bg-[#A50D26]">Read the guide →</Link>
+        <section className="bg-white border rounded-lg shadow-sm mb-8 md:mb-10 overflow-hidden dark:bg-[#122840] dark:border-[#24405E]">
+          {latest.cover && (<img src={latest.cover} alt={latest.cover_alt || latest.title} className="w-full aspect-video object-cover" />)}
+          <div className="p-6">
+            <p className="text-xs font-bold tracking-widest text-[#C8102E]">LATEST ARTICLE</p>
+            <h1 className="text-3xl md:text-4xl font-black mt-2 leading-tight"><Link to={articleUrl(latest)} className="hover:text-[#C8102E] hover:underline">{latest.title}</Link></h1>
+            <p className="text-[#6B7280] mt-3">{latest.excerpt}</p>
+            <p className="text-sm text-[#6B7280] mt-3">{latest.date} | The Newsroom Daily</p>
+            <Link to={articleUrl(latest)} className="inline-block mt-4 bg-[#C8102E] text-white font-bold px-4 py-2 rounded hover:bg-[#A50D26]">Read the guide &rarr;</Link>
+          </div>
         </section>
       )}
       <MostReadList articles={visible} />
@@ -253,7 +273,7 @@ function SearchPage() {
   const results = searchArticles(articles, q)
   return (
     <div>
-      <h1 className="text-3xl font-black">Search results for “{q}”</h1>
+      <h1 className="text-3xl font-black">Search results for &ldquo;{q}&rdquo;</h1>
       {loading && <p className="text-[#6B7280] mt-4">Loading articles...</p>}
       {results.length === 0 ? (<p className="text-[#6B7280] mt-4">No articles matched your search.</p>) : (
         <div className="grid gap-4 md:grid-cols-2 mt-6">
@@ -321,7 +341,7 @@ function ArticlePage() {
       <ReadingProgressBar />
       <p className="text-xs font-bold tracking-wide text-[#C8102E]">{categoryBySlug(a.category)?.name.toUpperCase()}</p>
       <h1 className="text-3xl md:text-4xl font-black mt-2 leading-tight">{a.title}</h1>
-      <p className="text-sm text-[#6B7280] mt-3">{a.date} | The Newsroom Daily | {minutes} min read{a.views > 0 ? ` · ${a.views} views` : ''}</p>
+      <p className="text-sm text-[#6B7280] mt-3">{a.date} | The Newsroom Daily | {minutes} min read{a.views > 0 ? ` \u00B7 ${a.views} views` : ''}</p>
       <div className="mt-4 flex flex-wrap items-center gap-3 print-hidden">
         <ShareButtons article={a} />
         <BookmarkButton article={a} />
@@ -351,7 +371,7 @@ function ArticlePage() {
         <ShareButtons article={a} />
       </div>
       <RelatedArticles a={a} />
-      <p className="mt-8 print-hidden"><Link to="/" className="text-[#C8102E] underline">← Back to home</Link></p>
+      <p className="mt-8 print-hidden"><Link to="/" className="text-[#C8102E] underline">&larr; Back to home</Link></p>
     </article>
   )
 }
