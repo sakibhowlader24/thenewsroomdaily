@@ -145,7 +145,7 @@ function Layout({ children }: { children: ReactNode }) {
       <footer className="bg-[#0F2A44] text-gray-300 dark:bg-[#081524] dark:text-slate-300 print:hidden">
         <div className="max-w-5xl mx-auto px-4 pt-6 md:pt-8">
           <div className="max-w-md">
-            <h2 className="font-serif text-xl font-bold text-white">Newsletter</h2>
+            <p className="font-serif text-xl font-bold text-white">Newsletter</p>
             <NewsletterForm tone="light" />
           </div>
         </div>
