@@ -6,7 +6,7 @@ export const ARTICLES: Article[] = [
     title: 'How to Make Money Fast in GTA 6: Best Early Methods',
     description: 'Learn how to make money fast in GTA 6 with early game jobs, side work, and smart spending habits that help new players in Leonida.',
     category: 'gaming',
-    date: '2026-11-25',
+    date: 'November 25, 2026',
     author: 'The Newsroom Daily',
     excerpt: 'Short on cash in Leonida? These early game methods help you earn steady money without wasting time.',
     content: [
@@ -40,7 +40,7 @@ export const ARTICLES: Article[] = [
     title: 'How to Speed Up a Slow Laptop in 10 Minutes',
     description: 'How to speed up a slow laptop in 10 minutes: close extra programs, clear startup apps, free space, and restart the right way.',
     category: 'tech-how-to',
-    date: '2026-11-25',
+    date: 'November 25, 2026',
     author: 'The Newsroom Daily',
     excerpt: 'A slow laptop is often a busy laptop. Ten quick minutes of cleanup can make it feel new again.',
     content: [
@@ -75,7 +75,7 @@ export const ARTICLES: Article[] = [
     title: 'How to Make a Monthly Budget You Can Actually Stick To',
     description: 'How to make a monthly budget you can actually stick to: track income, set simple limits, pay yourself first, and review weekly.',
     category: 'money-finance',
-    date: '2026-11-25',
+    date: 'November 25, 2026',
     author: 'The Newsroom Daily',
     excerpt: 'A budget that fits your real life beats a perfect budget you quit in week two.',
     content: [
