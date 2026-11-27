@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { BrowserRouter, Routes, Route, Link, useParams, Navigate, useSearchParams } from 'react-router-dom'
 import { ARTICLES } from './data/articles'
 import { CATEGORIES, SITE_NAME, SITE_URL, categoryBySlug } from './data/site'
