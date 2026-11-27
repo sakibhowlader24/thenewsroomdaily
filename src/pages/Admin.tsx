@@ -12,11 +12,15 @@ import {
   fetchRevisions,
   saveRevision,
   fetchHomepageCategories,
+  fetchArticleCorrections,
+  reviewArticleCorrection,
+  deleteArticleCorrection,
   saveHomepageCategories,
   ALL_CATEGORY_SLUGS,
   type ArticleRow,
   type ArticleRevision,
   type PublicArticle,
+  type ArticleCorrection,
 } from '../lib/supabase'
 import { formatBytes, uploadCoverImage } from '../lib/image'
 import { countWords, useSeo } from '../App'
@@ -100,6 +104,8 @@ export default function Admin() {
   const [uploadError, setUploadError] = useState('')
   const [homeCategories, setHomeCategories] = useState<string[]>(ALL_CATEGORY_SLUGS)
   const [settingsMsg, setSettingsMsg] = useState('')
+  const [corrections, setCorrections] = useState<ArticleCorrection[]>([])
+  const [correctionsMsg, setCorrectionsMsg] = useState('')
   const [restoreMsg, setRestoreMsg] = useState('')
   const [view, setView] = useState<'articles' | 'trash'>('articles')
   const [deleteTarget, setDeleteTarget] = useState<{ row: ArticleRow; permanent: boolean } | null>(null)
@@ -131,6 +137,7 @@ export default function Admin() {
     const list = await fetchAllArticles()
     setRows(list)
     setHomeCategories(await fetchHomepageCategories())
+    setCorrections(await fetchArticleCorrections())
     setLoading(false)
   }
   useEffect(() => { if (user) load() }, [user])
@@ -323,6 +330,21 @@ export default function Admin() {
     setBody(rev.content ?? '')
     setDirty(true)
     setRestoreMsg('Revision loaded into the form. Save the article to keep it.')
+  }
+
+  const reviewCorrection = async (c: ArticleCorrection, status: 'approved' | 'rejected') => {
+    setCorrectionsMsg('')
+    const ok = await reviewArticleCorrection(c, status)
+    if (!ok) { setCorrectionsMsg('Could not update that correction. Please try again.'); return }
+    setCorrections(await fetchArticleCorrections())
+    setRows(await fetchAllArticles())
+    setCorrectionsMsg(status === 'approved' ? 'Correction approved. The article now shows a Corrected date.' : 'Correction rejected.')
+  }
+  const removeCorrection = async (c: ArticleCorrection) => {
+    if (!window.confirm('Delete this correction report?')) return
+    const ok = await deleteArticleCorrection(c.id)
+    if (!ok) { setCorrectionsMsg('Could not delete that correction.'); return }
+    setCorrections(await fetchArticleCorrections())
   }
 
   const saveSettings = async () => {
@@ -567,6 +589,41 @@ export default function Admin() {
         {settingsMsg && <p className="text-sm text-green-700 mt-2">{settingsMsg}</p>}
       </section>
 
+      <section data-testid="admin-corrections" className="bg-white border rounded-lg p-6 shadow-sm mt-8 dark:bg-[#122840] dark:border-[#24405E]">
+        <h2 className="text-xl font-black">Corrections</h2>
+        <p className="text-sm text-[#6B7280] dark:text-slate-400 mt-1">Reader suggestions are reviewed here. Nothing changes on an article until you approve a correction.</p>
+        {correctionsMsg && <p role="status" className="mt-2 text-sm font-bold text-[#0F2A44] dark:text-slate-100">{correctionsMsg}</p>}
+        {corrections.length === 0 ? (
+          <p className="mt-3 text-sm text-[#6B7280] dark:text-slate-400">No correction reports yet.</p>
+        ) : (
+          <ul className="mt-3 space-y-3">
+            {corrections.map((c) => {
+              const row = rows.find((r) => r.id === c.article_id)
+              const art = row ? rowToArticle(row) : null
+              return (
+                <li key={c.id} data-testid="admin-correction" className="rounded border border-gray-200 p-4 dark:border-[#24405E]">
+                  <p className="font-bold">{art ? <Link to={articleUrl(art)}>{art.title}</Link> : 'Article ' + c.article_id}</p>
+                  <p className="mt-2 text-sm"><span className="font-bold">Wrong line: </span>{c.wrong_text}</p>
+                  <p className="mt-1 text-sm"><span className="font-bold">Suggested correction: </span>{c.correction}</p>
+                  <p className="mt-1 text-sm"><span className="font-bold">Source: </span><a href={c.source_url} target="_blank" rel="noreferrer" className="text-[#C8102E] underline break-all">{c.source_url}</a></p>
+                  {(c.name || c.email) && <p className="mt-1 text-sm text-[#6B7280] dark:text-slate-400">{[c.name, c.email].filter(Boolean).join(' | ')}</p>}
+                  <p className="mt-1 text-sm text-[#6B7280] dark:text-slate-400">{new Date(c.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} | Status: <span className="font-bold">{c.status}</span></p>
+                  {c.status === 'pending' ? (
+                    <span className="mt-3 flex flex-wrap gap-2">
+                      <button onClick={() => reviewCorrection(c, 'approved')} className="rounded bg-[#C8102E] px-3 py-1 text-sm font-bold text-white hover:bg-[#A50D26]">Approve</button>
+                      <button onClick={() => reviewCorrection(c, 'rejected')} className="rounded border border-[#0F2A44]/20 px-3 py-1 text-sm font-bold text-[#0F2A44] hover:border-[#C8102E] hover:text-[#C8102E] dark:border-[#24405E] dark:text-slate-100">Reject</button>
+                    </span>
+                  ) : (
+                    <span className="mt-3 flex flex-wrap gap-2">
+                      <button onClick={() => removeCorrection(c)} className="rounded border border-[#0F2A44]/20 px-3 py-1 text-sm font-bold text-[#0F2A44] hover:border-[#C8102E] hover:text-[#C8102E] dark:border-[#24405E] dark:text-slate-100">Delete</button>
+                    </span>
+                  )}
+                </li>
+              )
+            })}
+          </ul>
+        )}
+      </section>
       <div className="flex gap-2 mt-8">
         <button onClick={() => setView('articles')} className={view === 'articles' ? 'bg-[#0F2A44] text-white font-bold px-4 py-2 rounded' : 'border rounded px-4 py-2'}>Articles ({active.length})</button>
         <button onClick={() => setView('trash')} className={view === 'trash' ? 'bg-[#0F2A44] text-white font-bold px-4 py-2 rounded' : 'border rounded px-4 py-2'}>Trash ({trashed.length})</button>
