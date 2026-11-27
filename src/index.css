@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 @theme {
   --font-serif: "Playfair Display", Merriweather, Georgia, "Times New Roman", serif;
   --font-sans: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -9,15 +10,46 @@
 }
 body { background: #ffffff; color: #1F2937; font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif; }
 h1, h2, h3 { font-family: "Playfair Display", Merriweather, Georgia, "Times New Roman", serif; color: #0F2A44; }
-
 @media (max-width: 767px) {
   header nav { scrollbar-width: none; }
   header nav::-webkit-scrollbar { display: none; }
   header nav a { padding-top: 0.5rem; padding-bottom: 0.5rem; }
 }
-
 .menu-link:hover, .menu-link:active {
   color: #C8102E;
   background-color: #F9FAFB;
+  box-shadow: inset 4px 0 0 0 #C8102E;
+}
+/* Dark mode: dark navy page, darker navy surfaces, light text, red accent kept. */
+.dark { color-scheme: dark; }
+.dark body { background: #0A1A2C; color: #E8EDF3; }
+.dark h1, .dark h2, .dark h3 { color: #F1F5F9; }
+.dark .bg-white { background-color: #122840; }
+.dark .bg-gray-50 { background-color: #0F2238; }
+.dark .bg-gray-100 { background-color: #16324F; }
+.dark .border { border-color: #24405E; }
+.dark .border-gray-200 { border-color: #24405E; }
+.dark .divide-gray-100 > :not([hidden]) ~ :not([hidden]) { border-color: #24405E; }
+.dark .text-\[\#1F2937\] { color: #E8EDF3; }
+.dark .text-\[\#0F2A44\] { color: #E8EDF3; }
+.dark .text-\[\#6B7280\] { color: #9AA8B8; }
+.dark .text-\[\#545454\] { color: #9AA8B8; }
+.dark .text-\[\#1a0dab\] { color: #8AB4F8; }
+.dark .text-\[\#006621\] { color: #81C995; }
+.dark .bg-green-100 { background-color: #123524; }
+.dark .border-green-300 { border-color: #166534; }
+.dark .text-green-800 { color: #BBF7D0; }
+.dark .text-green-700 { color: #86EFAC; }
+.dark .bg-red-100 { background-color: #3B1116; }
+.dark .bg-red-50 { background-color: #2A0E12; }
+.dark .border-red-300 { border-color: #7F1D1D; }
+.dark .text-red-800 { color: #FECACA; }
+.dark .text-red-600 { color: #F87171; }
+.dark input, .dark textarea, .dark select { background-color: #122840; color: #E8EDF3; border-color: #24405E; }
+.dark input::placeholder, .dark textarea::placeholder { color: #7C8DA3; }
+.dark select option { background-color: #122840; color: #E8EDF3; }
+.dark .menu-link:hover, .dark .menu-link:active {
+  color: #FF6B81;
+  background-color: #16324F;
   box-shadow: inset 4px 0 0 0 #C8102E;
 }
