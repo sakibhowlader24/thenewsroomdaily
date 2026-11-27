@@ -1,7 +1,7 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useState, type ReactNode } from 'react'
 import { BrowserRouter, Routes, Route, Link, useParams, Navigate, useSearchParams } from 'react-router-dom'
 import { ARTICLES } from './data/articles'
-import { CATEGORIES, SITE_NAME, SITE_URL, categoryBySlug } from './data/site'
+import { CATEGORIES, SITE_NAME, categoryBySlug } from './data/site'
 import {
   fetchPublishedArticles, fetchArticleBySlug, fetchRelatedArticles, isDuePublished,
   fetchArticleById, articleUrl,
@@ -10,7 +10,7 @@ import {
   ALL_CATEGORY_SLUGS,
   type PublicArticle,
 } from './lib/supabase'
-import { SearchBox, ShareButtons, ReadingProgressBar, BookmarkButton, useBookmarks, buildToc, blockAnchorId, searchArticles, ReaderArticleCard } from './lib/reader'
+import { SearchBox, ShareButtons, ReadingProgressBar, BookmarkButton, useBookmarks, buildToc, blockAnchorId, searchArticles } from './lib/reader'
 import { FontSizeControl, ListenControl, PrintButton, ArticleFeedback, NewsletterForm, MostReadList, getSavedFontSize, ARTICLE_FONT_SIZE_PX, FONT_SIZE_KEY, type ArticleFontSize } from './lib/reader-features'
 const Admin = lazy(() => import('./pages/Admin'))
 
@@ -286,9 +286,7 @@ function ArticlePage() {
   const { slug, category, id } = useParams()
   const [a, setA] = useState<PublicArticle | null>(null)
   const [loading, setLoading] = useState(true)
-  const [related, setRelated] = useState<PublicArticle[]>([])
   const [fontSize, setFontSize] = useState<ArticleFontSize>(getSavedFontSize)
-  const tocRef = useRef<HTMLDivElement | null>(null)
   const toc = buildToc(a?.content ?? [])
   useEffect(() => {
     try { localStorage.setItem(FONT_SIZE_KEY, fontSize) } catch { /* ignore */ }
@@ -312,11 +310,6 @@ function ArticlePage() {
     run().catch(() => { if (live) setLoading(false) })
     return () => { live = false }
   }, [id, slug])
-  useEffect(() => {
-    let live = true
-    if (a) fetchRelatedArticles(a.category, a.slug).then((list) => { if (live) setRelated(list) }).catch(() => {})
-    return () => { live = false }
-  }, [a])
   useSeo(a ? a.title : 'Article', a ? a.description : 'Read a guide on The Newsroom Daily.')
   if (loading) return <p className="text-[#6B7280]">Loading article...</p>
   if (!a) return <p>Article not found. <Link to="/" className="text-[#C8102E] underline">Go home</Link></p>
