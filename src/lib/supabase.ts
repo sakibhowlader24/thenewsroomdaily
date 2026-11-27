@@ -124,7 +124,7 @@ export function articleToRow(a: PublicArticle): Omit<ArticleRow, 'id'> {
     deleted_at: a.deleted_at ?? null,
     scheduled_at: a.scheduled_at ?? null,
     cover_alt: a.cover_alt ?? null,
-    corrected_at: a.corrected_at ?? null,
+    ...(a.corrected_at ? { corrected_at: a.corrected_at } : {}),
   }
 }
 
