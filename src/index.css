@@ -66,3 +66,13 @@ html { scroll-behavior: smooth; }
   a { color: #000000 !important; text-decoration: none !important; }
   article, div, section { background: #ffffff !important; border: none !important; box-shadow: none !important; }
 }
+
+/* Article pages: stop horizontal overflow on phones. Long URLs and the table-of-contents box must fit the viewport. */
+html, body { overflow-x: hidden; }
+*, *::before, *::after { box-sizing: border-box; }
+img, video { max-width: 100%; height: auto; }
+main, article { min-width: 0; max-width: 100%; }
+[data-testid="article-body"] { max-width: 100%; overflow-wrap: break-word; word-break: break-word; }
+[data-testid="article-body"] p, [data-testid="article-body"] h2, [data-testid="article-body"] a { overflow-wrap: break-word; word-break: break-word; }
+nav[aria-label="Table of contents"] { width: 100%; max-width: 100%; box-sizing: border-box; overflow: hidden; }
+nav[aria-label="Table of contents"] a { overflow-wrap: break-word; word-break: break-word; }
