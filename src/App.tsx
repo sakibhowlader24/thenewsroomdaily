@@ -12,6 +12,19 @@ import {
 } from './lib/supabase'
 const Admin = lazy(() => import('./pages/Admin'))
 
+const THEME_KEY = 'newsroom-theme'
+type Theme = 'light' | 'dark'
+
+function getInitialTheme(): Theme {
+  if (typeof window === 'undefined') return 'light'
+  if (document.documentElement.classList.contains('dark')) return 'dark'
+  try {
+    const saved = localStorage.getItem(THEME_KEY)
+    if (saved === 'dark' || saved === 'light') return saved
+  } catch { /* ignore */ }
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+}
+
 export function useSeo(title: string, description: string) {
   useEffect(() => {
     document.title = title + ' | ' + SITE_NAME
@@ -46,22 +59,40 @@ export function countWords(text: string): number {
 function ArticleCard({ a }: { a: PublicArticle }) {
   const cat = categoryBySlug(a.category)
   return (
-    <article className="border rounded-lg p-5 bg-white shadow-sm">
+    <article className="border rounded-lg p-5 bg-white shadow-sm dark:bg-[#122840] dark:border-[#24405E]">
       {a.cover && (<img src={a.cover} alt={a.cover_alt || a.title} className="w-full h-40 object-cover rounded mb-4" loading="lazy" />)}
       <p className="text-xs font-bold uppercase tracking-wide text-[#C8102E]">
         {cat ? cat.name : a.category}
         {a.is_featured && (<span className="ml-2 bg-[#C8102E] text-white px-2 py-0.5 rounded normal-case tracking-normal">Featured</span>)}
       </p>
       <h3 className="text-xl font-bold mt-2 leading-snug"><Link to={articleUrl(a)} className="hover:underline">{a.title}</Link></h3>
-      <p className="text-[#6B7280] mt-2">{a.excerpt}</p>
-      <p className="text-sm text-[#6B7280] mt-3">{a.date} | {a.author}{a.views > 0 ? ' | ' + a.views + ' views' : ''}</p>
+      <p className="text-[#6B7280] mt-2 dark:text-slate-400">{a.excerpt}</p>
+      <p className="text-sm text-[#6B7280] mt-3 dark:text-slate-400">{a.date} | {a.author}{a.views > 0 ? ' | ' + a.views + ' views' : ''}</p>
     </article>
   )
 }
 
 function Layout({ children }: { children: React.ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [theme, setTheme] = useState<Theme>(getInitialTheme)
   const menuRef = useRef<HTMLElement | null>(null)
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', theme === 'dark')
+    document.documentElement.style.colorScheme = theme
+  }, [theme])
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-color-scheme: dark)')
+    const onChange = () => {
+      try { if (!localStorage.getItem(THEME_KEY)) setTheme(mq.matches ? 'dark' : 'light') } catch { /* ignore */ }
+    }
+    mq.addEventListener('change', onChange)
+    return () => mq.removeEventListener('change', onChange)
+  }, [])
+  const toggleTheme = () => {
+    const next: Theme = theme === 'dark' ? 'light' : 'dark'
+    try { localStorage.setItem(THEME_KEY, next) } catch { /* ignore */ }
+    setTheme(next)
+  }
   useEffect(() => {
     if (!menuOpen) return
     const onDown = (e: MouseEvent) => { if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false) }
@@ -71,11 +102,11 @@ function Layout({ children }: { children: React.ReactNode }) {
     return () => { document.removeEventListener('mousedown', onDown); document.removeEventListener('keydown', onKey) }
   }, [menuOpen])
   return (
-    <div className="min-h-screen flex flex-col bg-white text-[#1F2937]">
-      <header className="bg-white text-[#0F2A44]">
+    <div className="min-h-screen flex flex-col bg-white text-[#1F2937] dark:bg-[#0A1A2C] dark:text-slate-200">
+      <header className="bg-white text-[#0F2A44] dark:bg-[#0D2138] dark:text-slate-100">
         <div className="max-w-5xl mx-auto px-4 py-3 flex flex-col items-start gap-2 md:flex-row md:flex-wrap md:items-center md:justify-between md:gap-3">
           <Link to="/" aria-label="The Newsroom Daily" className="inline-flex flex-col items-start leading-none">
-            <span className="font-serif text-[1.75rem] md:text-[2.75rem] font-black tracking-tight text-[#0F2A44]">The Newsroom</span>
+            <span className="font-serif text-[1.75rem] md:text-[2.75rem] font-black tracking-tight text-[#0F2A44] dark:text-white">The Newsroom</span>
             <span className="mt-1 flex w-full items-center justify-end gap-1.5 md:mt-1.5">
               <span className="text-base md:text-xl font-extrabold tracking-[0.35em] text-[#C8102E]">DAILY</span>
               <span aria-hidden="true" className="inline-block h-2.5 w-3 shrink-0 bg-[#C8102E] md:h-3 md:w-[15px]" />
@@ -87,6 +118,13 @@ function Layout({ children }: { children: React.ReactNode }) {
             {CATEGORIES.slice(2).map((c) => (<Link key={c.slug} to={'/category/' + c.slug} className="hidden hover:underline md:inline">{c.name}</Link>))}
             <Link to="/about" className="hidden hover:underline md:inline">About</Link>
             <Link to="/contact" className="hidden hover:underline md:inline">Contact</Link>
+            <button type="button" aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} onClick={toggleTheme} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#0F2A44]/20 bg-white text-[#0F2A44] shadow-sm transition-colors hover:bg-gray-100 dark:border-white/20 dark:bg-[#122840] dark:text-amber-300 dark:hover:bg-[#1A3550]">
+              {theme === 'dark' ? (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="currentColor" /><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
+              ) : (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" fill="currentColor" /></svg>
+              )}
+            </button>
             <button type="button" aria-label={menuOpen ? 'Close menu' : 'More links'} aria-expanded={menuOpen} onClick={() => setMenuOpen((v) => !v)} className={'flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white shadow-md transition-colors md:hidden ' + (menuOpen ? 'bg-[#C8102E]' : 'bg-[#0F2A44] hover:bg-[#C8102E] active:bg-[#C8102E]')}>
               {menuOpen ? (
                 <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3 3l12 12M15 3L3 15" stroke="white" strokeWidth="2.5" strokeLinecap="round" /></svg>
@@ -95,10 +133,10 @@ function Layout({ children }: { children: React.ReactNode }) {
               )}
             </button>
             {menuOpen && (
-              <div className="absolute right-0 top-full z-50 mt-2 w-56 divide-y divide-gray-100 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl md:hidden">
-                {CATEGORIES.slice(2).map((c) => (<Link key={c.slug} to={'/category/' + c.slug} onClick={() => setMenuOpen(false)} className="menu-link block px-4 py-3 text-[#0F2A44]">{c.name}</Link>))}
-                <Link to="/about" onClick={() => setMenuOpen(false)} className="menu-link block px-4 py-3 text-[#0F2A44]">About</Link>
-                <Link to="/contact" onClick={() => setMenuOpen(false)} className="menu-link block px-4 py-3 text-[#0F2A44]">Contact</Link>
+              <div className="absolute right-0 top-full z-50 mt-2 w-56 divide-y divide-gray-100 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl md:hidden dark:divide-[#24405E] dark:border-[#24405E] dark:bg-[#122840]">
+                {CATEGORIES.slice(2).map((c) => (<Link key={c.slug} to={'/category/' + c.slug} onClick={() => setMenuOpen(false)} className="menu-link block px-4 py-3 text-[#0F2A44] dark:text-slate-100">{c.name}</Link>))}
+                <Link to="/about" onClick={() => setMenuOpen(false)} className="menu-link block px-4 py-3 text-[#0F2A44] dark:text-slate-100">About</Link>
+                <Link to="/contact" onClick={() => setMenuOpen(false)} className="menu-link block px-4 py-3 text-[#0F2A44] dark:text-slate-100">Contact</Link>
               </div>
             )}
           </nav>
@@ -106,7 +144,7 @@ function Layout({ children }: { children: React.ReactNode }) {
         <div aria-hidden="true" className="h-[3px] w-full bg-[#C8102E]" />
       </header>
       <main className="flex-1 max-w-5xl w-full mx-auto px-4 py-6 md:py-8">{children}</main>
-      <footer className="bg-[#0F2A44] text-gray-300">
+      <footer className="bg-[#0F2A44] text-gray-300 dark:bg-[#081524] dark:text-slate-300">
         <div className="max-w-5xl mx-auto px-4 py-6 text-sm flex flex-wrap gap-3 justify-between md:py-8 md:gap-6">
           <p>{SITE_NAME} | Clear, practical guides for everyday readers.</p>
           <p className="flex gap-4">
@@ -132,11 +170,11 @@ function Home() {
   return (
     <div>
       {latest && (
-        <section className="bg-white border rounded-lg p-5 shadow-sm mb-8 md:p-6 md:mb-10">
+        <section className="bg-white border rounded-lg p-5 shadow-sm mb-8 md:p-6 md:mb-10 dark:bg-[#122840] dark:border-[#24405E]">
           <p className="text-xs font-bold uppercase tracking-wide text-[#C8102E]">Latest article</p>
           <h1 className="text-3xl md:text-4xl font-black mt-2 leading-tight"><Link to={articleUrl(latest)} className="hover:underline">{latest.title}</Link></h1>
-          <p className="text-[#6B7280] mt-3 text-lg">{latest.excerpt}</p>
-          <p className="text-sm text-[#6B7280] mt-3">{latest.date} | {latest.author}</p>
+          <p className="text-[#6B7280] mt-3 text-lg dark:text-slate-400">{latest.excerpt}</p>
+          <p className="text-sm text-[#6B7280] mt-3 dark:text-slate-400">{latest.date} | {latest.author}</p>
           <Link to={articleUrl(latest)} className="inline-block mt-4 bg-[#C8102E] text-white font-bold px-4 py-2 rounded">Read the guide →</Link>
         </section>
       )}
@@ -153,8 +191,8 @@ function Home() {
         return (
           <section key={c.slug} className="mb-8 md:mb-10">
             <h2 className="text-2xl font-bold"><Link to={'/category/' + c.slug} className="hover:underline">{c.name}</Link></h2>
-            <p className="text-[#6B7280] mt-1 mb-4">{c.description}</p>
-            {list.length ? (<div className="grid md:grid-cols-2 gap-5">{list.map((a) => (<ArticleCard key={a.slug} a={a} />))}</div>) : (<p className="text-[#6B7280]">More guides in this category are coming soon.</p>)}
+            <p className="text-[#6B7280] mt-1 mb-4 dark:text-slate-400">{c.description}</p>
+            {list.length ? (<div className="grid md:grid-cols-2 gap-5">{list.map((a) => (<ArticleCard key={a.slug} a={a} />))}</div>) : (<p className="text-[#6B7280] dark:text-slate-400">More guides in this category are coming soon.</p>)}
           </section>
         )
       })}
@@ -165,14 +203,15 @@ function Home() {
 // Legacy /article/:slug URLs redirect to the new /:category/:id form.
 function LegacyArticleRedirect() {
   const { slug } = useParams()
-    const [target, setTarget] = useState<string | null>(null)
-      const [missing, setMissing] = useState(false)
-          useEffect(() => { let live = true; fetchArticleBySlug(slug ?? '').then((found) => { if (!live) return; const visible = found && isDuePublished(found.status, found.scheduled_at) ? found : null; const article = visible ?? (ARTICLES.find((x) => x.slug === slug) as PublicArticle | undefined) ?? null; if (article && article.id != null) setTarget(articleUrl(article)); else setMissing(true) }).catch(() => { if (live) setMissing(true) }); return () => { live = false } }, [slug])
-            if (missing) return (<div><h1 className="text-3xl font-bold">Article not found</h1><p className="mt-3"><Link to="/" className="text-[#C8102E] underline">Back to home</Link></p></div>)
-              if (target) return <Navigate to={target} replace />
-  return (<div className="flex flex-col items-center justify-center py-16"><div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-[#C8102E]" /><p className="mt-4 text-[#6B7280]">Loading...</p></div>)
+  const [target, setTarget] = useState<string | null>(null)
+  const [missing, setMissing] = useState(false)
+  useEffect(() => { let live = true; fetchArticleBySlug(slug ?? '').then((found) => { if (!live) return; const visible = found && isDuePublished(found.status, found.scheduled_at) ? found : null; const article = visible ?? (ARTICLES.find((x) => x.slug === slug) as PublicArticle | undefined) ?? null; if (article && article.id != null) setTarget(articleUrl(article)); else setMissing(true) }).catch(() => { if (live) setMissing(true) }); return () => { live = false } }, [slug])
+  if (missing) return (<div><h1 className="text-3xl font-bold">Article not found</h1><p className="mt-3"><Link to="/" className="text-[#C8102E] underline">Back to home</Link></p></div>)
+  if (target) return <Navigate to={target} replace />
+  return (<div className="flex flex-col items-center justify-center py-16"><div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-[#C8102E] dark:border-slate-700" /><p className="mt-4 text-[#6B7280] dark:text-slate-400">Loading...</p></div>)
 }
-                function ArticlePage() {
+
+function ArticlePage() {
   const { category, id } = useParams()
   const numericId = Number(id)
   const [a, setA] = useState<PublicArticle | null>(null); const [loading, setLoading] = useState(true); const [related, setRelated] = useState<PublicArticle[]>([])
@@ -186,9 +225,9 @@ function LegacyArticleRedirect() {
       void incrementArticleViews(a.slug)
     }
   }, [a?.slug])
-  if (loading && !a) return (<div className="flex flex-col items-center justify-center py-16"><div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-[#C8102E]" /><p className="mt-4 text-[#6B7280]">Loading...</p></div>); if (!a) return (<div><h1 className="text-3xl font-bold">Article not found</h1><p className="mt-3"><Link to="/" className="text-[#C8102E] underline">Back to home</Link></p></div>)
+  if (loading && !a) return (<div className="flex flex-col items-center justify-center py-16"><div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-[#C8102E] dark:border-slate-700" /><p className="mt-4 text-[#6B7280] dark:text-slate-400">Loading...</p></div>); if (!a) return (<div><h1 className="text-3xl font-bold">Article not found</h1><p className="mt-3"><Link to="/" className="text-[#C8102E] underline">Back to home</Link></p></div>)
   if (a && a.category !== category) return <Navigate to={articleUrl(a)} replace />
-    const cat = categoryBySlug(a.category)
+  const cat = categoryBySlug(a.category)
   // Related articles are fetched in the effect above with fetchRelatedArticles.
   const words = countWords(a.content.join(' '))
   const readMinutes = Math.max(1, Math.ceil(words / 200))
@@ -196,12 +235,12 @@ function LegacyArticleRedirect() {
     <article>
       <p className="text-xs font-bold uppercase tracking-wide text-[#C8102E]"><Link to={'/category/' + a.category} className="hover:underline">{cat ? cat.name : a.category}</Link></p>
       <h1 className="text-3xl md:text-4xl font-black mt-2 leading-tight">{a.title}</h1>
-      <p className="text-sm text-[#6B7280] mt-3">{a.date} | By {a.author} | {readMinutes} min read{a.views > 0 ? ' | ' + a.views + ' views' : ''}</p>
+      <p className="text-sm text-[#6B7280] mt-3 dark:text-slate-400">{a.date} | By {a.author} | {readMinutes} min read{a.views > 0 ? ' | ' + a.views + ' views' : ''}</p>
       {a.cover && (<img src={a.cover} alt={a.cover_alt || a.title} className="w-full rounded-lg mt-6" />)}
-      <div className="mt-6 space-y-4 text-lg leading-relaxed bg-white border rounded-lg p-6 shadow-sm">
+      <div className="mt-6 space-y-4 text-lg leading-relaxed bg-white border rounded-lg p-6 shadow-sm dark:bg-[#122840] dark:border-[#24405E]">
         {a.content.map((block, i) => block.startsWith('## ') ? (<h2 key={i} className="text-2xl font-bold pt-2">{block.slice(3)}</h2>) : (<p key={i}>{block}</p>))}
       </div>
-      <p className="text-sm text-[#6B7280] mt-4">Sources: official game and product pages, and general guidance from public help pages. Money and health articles are general education, not personal advice.</p>
+      <p className="text-sm text-[#6B7280] mt-4 dark:text-slate-400">Sources: official game and product pages, and general guidance from public help pages. Money and health articles are general education, not personal advice.</p>
       {related.length > 0 && (<section className="mt-10"><h2 className="text-2xl font-bold mb-4">Related articles</h2><div className="grid md:grid-cols-2 gap-5">{related.map((r) => (<ArticleCard key={r.slug} a={r} />))}</div></section>)}
       <p className="mt-8"><Link to="/" className="text-[#C8102E] underline">Back to home</Link></p>
     </article>
@@ -218,8 +257,8 @@ function CategoryPage() {
   return (
     <div>
       <h1 className="text-3xl font-bold">{cat.name}</h1>
-      <p className="text-[#6B7280] mt-2 mb-6">{cat.description}</p>
-      {list.length ? (<div className="grid md:grid-cols-2 gap-5">{list.map((a) => (<ArticleCard key={a.slug} a={a} />))}</div>) : (<p className="text-[#6B7280]">More guides in this category are coming soon. Check back for new articles.</p>)}
+      <p className="text-[#6B7280] mt-2 mb-6 dark:text-slate-400">{cat.description}</p>
+      {list.length ? (<div className="grid md:grid-cols-2 gap-5">{list.map((a) => (<ArticleCard key={a.slug} a={a} />))}</div>) : (<p className="text-[#6B7280] dark:text-slate-400">More guides in this category are coming soon. Check back for new articles.</p>)}
     </div>
   )
 }
@@ -227,7 +266,7 @@ function CategoryPage() {
 function About() {
   useSeo('About', 'About The Newsroom Daily: clear, practical guides on gaming, tech, money, career and everyday life, written in plain words.')
   return (
-    <div className="bg-white border rounded-lg p-6 shadow-sm space-y-4 text-lg leading-relaxed">
+    <div className="bg-white border rounded-lg p-6 shadow-sm space-y-4 text-lg leading-relaxed dark:bg-[#122840] dark:border-[#24405E]">
       <h1 className="text-3xl font-black">About {SITE_NAME}</h1>
       <p>{SITE_NAME} is a new English news and guide site. Our goal is simple: explain useful things in plain words, so any reader can act on them.</p>
       <p>We cover five areas: GTA 6 gaming, tech how-to, money and finance, career and work, and everyday guides. Most of our work is evergreen, which means a good guide should still help a reader months or years after it is published.</p>
@@ -244,9 +283,9 @@ function Contact() {
   return (
     <div>
       <h1 className="text-3xl font-black">Contact</h1>
-      <p className="text-[#6B7280] mt-2">Send a question, a correction, or a story idea. We read every message and reply by email when an answer is needed.</p>
+      <p className="text-[#6B7280] mt-2 dark:text-slate-400">Send a question, a correction, or a story idea. We read every message and reply by email when an answer is needed.</p>
       {sent ? (
-        <p className="bg-green-100 border border-green-300 rounded p-4 mt-4">Thank you. Your message was sent. We will reply by email when an answer is needed.</p>
+        <p className="bg-green-100 border border-green-300 rounded p-4 mt-4 dark:bg-green-950 dark:border-green-800 dark:text-green-100">Thank you. Your message was sent. We will reply by email when an answer is needed.</p>
       ) : (
         <form className="space-y-4 mt-4" action="https://formsubmit.co/rtvsakib@gmail.com" method="POST">
           <input type="hidden" name="_subject" value="New contact message - The Newsroom Daily" />
@@ -255,15 +294,15 @@ function Contact() {
           <input type="hidden" name="_next" value={SITE_URL + '/contact?sent=1'} />
           <div>
             <label className="block font-bold mb-1">Name</label>
-            <input name="name" required className="w-full border rounded p-3" />
+            <input name="name" required className="w-full border rounded p-3 dark:bg-[#122840] dark:border-[#24405E] dark:text-slate-100" />
           </div>
           <div>
             <label className="block font-bold mb-1">Email</label>
-            <input name="email" type="email" required className="w-full border rounded p-3" />
+            <input name="email" type="email" required className="w-full border rounded p-3 dark:bg-[#122840] dark:border-[#24405E] dark:text-slate-100" />
           </div>
           <div>
             <label className="block font-bold mb-1">Message</label>
-            <textarea name="message" required rows={5} className="w-full border rounded p-3" />
+            <textarea name="message" required rows={5} className="w-full border rounded p-3 dark:bg-[#122840] dark:border-[#24405E] dark:text-slate-100" />
           </div>
           <button className="bg-[#C8102E] text-white font-bold px-5 py-3 rounded hover:bg-[#A50D26]">Send message</button>
         </form>
@@ -275,7 +314,7 @@ function Contact() {
 function Privacy() {
   useSeo('Privacy Policy', 'Privacy Policy for The Newsroom Daily: what we collect, how we use it, and how to contact us.')
   return (
-    <div className="bg-white border rounded-lg p-6 shadow-sm space-y-4 text-lg leading-relaxed">
+    <div className="bg-white border rounded-lg p-6 shadow-sm space-y-4 text-lg leading-relaxed dark:bg-[#122840] dark:border-[#24405E]">
       <h1 className="text-3xl font-black">Privacy Policy</h1>
       <p>Last updated: November 25, 2026.</p>
       <p>{SITE_NAME} does not sell personal information. This site does not use advertising trackers at launch, and it does not run Google AdSense.</p>
@@ -297,9 +336,8 @@ export default function App() {
           <Route path="/article/:slug" element={<LegacyArticleRedirect />} />
           <Route path="/category/:slug" element={<CategoryPage />} />
           <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
           <Route path="/privacy" element={<Privacy />} />
-          <Route path="/admin" element={<Suspense fallback={<div className="text-center py-16"><p className="text-[#6B7280]">Loading admin...</p></div>}><Admin /></Suspense>} />
+          <Route path="/admin" element={<Suspense fallback={<div className="text-center py-16"><p className="text-[#6B7280] dark:text-slate-400">Loading admin...</p></div>}><Admin /></Suspense>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Layout>
