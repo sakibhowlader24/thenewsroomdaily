@@ -68,7 +68,7 @@ html { scroll-behavior: smooth; }
 }
 
 /* Article pages: stop horizontal overflow on phones. Long URLs and the table-of-contents box must fit the viewport. */
-html, body { overflow-x: hidden; }
+html, body { overflow-x: clip; }
 *, *::before, *::after { box-sizing: border-box; }
 img, video { max-width: 100%; height: auto; }
 main, article { min-width: 0; max-width: 100%; } @media (min-width: 768px) { .hero-cover { height: 440px; object-fit: cover; } } .feature-headline { color: #C8102E; } .dark .feature-headline { color: #FF6B81; } .newsletter-title { color: #ffffff; } header .menu-link { color: #ffffff; } header .menu-link:hover, header .menu-link:active { color: #ffffff; background-color: rgba(255, 255, 255, 0.15); box-shadow: none; }
