@@ -252,3 +252,30 @@ export async function saveHomepageCategories(slugs: string[]): Promise<void> {
 export function articleUrl(a: { category: string; id?: number | null; slug: string }): string {
   return a.id != null ? '/' + a.category + '/' + a.id : '/article/' + a.slug
 }
+
+// ---- Newsletter and article feedback (reader features) ----
+export async function subscribeNewsletter(email: string): Promise<{ ok: boolean; error?: string }> {
+  if (!supabase) return { ok: false, error: 'Newsletter signup is not available right now.' }
+  const { error } = await supabase.from('newsletter_subscribers').insert({ email: email.trim().toLowerCase() })
+  if (error) return { ok: false, error: error.message }
+  return { ok: true }
+}
+
+export async function submitArticleFeedback(articleId: number, helpful: boolean): Promise<boolean> {
+  if (!supabase) return false
+  const { error } = await supabase.from('article_feedback').insert({ article_id: articleId, helpful })
+  return !error
+}
+
+export async function fetchArticleFeedbackCounts(articleId: number): Promise<{ helpful: number; notHelpful: number }> {
+  if (!supabase) return { helpful: 0, notHelpful: 0 }
+  const { data, error } = await supabase.rpc('article_feedback_counts', { p_article_id: articleId })
+  if (error || !data) return { helpful: 0, notHelpful: 0 }
+  const row = Array.isArray(data) ? data[0] : data
+  return { helpful: Number(row?.helpful_count ?? 0), notHelpful: Number(row?.not_helpful_count ?? 0) }
+}
+
+export async function fetchMostReadArticles(limit = 5): Promise<PublicArticle[]> {
+  const list = await fetchPublishedArticles()
+  return [...list].sort((a, b) => (b.views ?? 0) - (a.views ?? 0)).slice(0, limit)
+}
