@@ -71,7 +71,7 @@ html { scroll-behavior: smooth; }
 html, body { overflow-x: hidden; }
 *, *::before, *::after { box-sizing: border-box; }
 img, video { max-width: 100%; height: auto; }
-main, article { min-width: 0; max-width: 100%; }
+main, article { min-width: 0; max-width: 100%; } @media (min-width: 768px) { .hero-cover { height: 440px; object-fit: cover; } }
 [data-testid="article-body"] { max-width: 100%; overflow-wrap: break-word; word-break: break-word; }
 [data-testid="article-body"] p, [data-testid="article-body"] h2, [data-testid="article-body"] a { overflow-wrap: break-word; word-break: break-word; }
 nav[aria-label="Table of contents"] { width: 100%; max-width: 100%; box-sizing: border-box; overflow: hidden; }
