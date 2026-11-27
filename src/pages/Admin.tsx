@@ -340,7 +340,7 @@ export default function Admin() {
     setRows(await fetchAllArticles())
     setCorrectionsMsg(status === 'approved' ? 'Correction approved. The article now shows a Corrected date.' : 'Correction rejected.')
   }
-  const downloadSubscribersCsv = () => { const header = 'email,subscribed date'; const lines = subscribers.map((s) => s.email + ',"' + formatUsDate(s.created_at) + '"'); const csv = [header, ...lines].join(String.fromCharCode(10)); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'newsletter-subscribers.csv'; a.click(); URL.revokeObjectURL(url) } const removeCorrection = async (c: ArticleCorrection) => {
+  const downloadSubscribersCsv = () => { const header = 'email,subscribed date'; const lines = subscribers.map((s) => s.email + ',"' + formatUsDate(s.created_at) + '"'); const csv = [header, ...lines].join(String.fromCharCode(10)); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'newsletter-subscribers.csv'; a.click(); URL.revokeObjectURL(url) }; const removeCorrection = async (c: ArticleCorrection) => {
     if (!window.confirm('Delete this correction report?')) return
     const ok = await deleteArticleCorrection(c.id)
     if (!ok) { setCorrectionsMsg('Could not delete that correction.'); return }
