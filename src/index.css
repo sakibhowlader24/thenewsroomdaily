@@ -53,6 +53,16 @@ h1, h2, h3 { font-family: "Playfair Display", Merriweather, Georgia, "Times New 
   background-color: #16324F;
   box-shadow: inset 4px 0 0 0 #C8102E;
 }
-
 /* Smooth scrolling for table-of-contents jump links. */
 html { scroll-behavior: smooth; }
+/* Print / PDF: clean article only — hide the header, navigation, footer, share buttons and toggle controls, and show only the title, date and article body. */
+@media print {
+  header, footer, nav, .print-hidden, .fixed { display: none !important; }
+  html { scroll-behavior: auto; }
+  body, .dark body { background: #ffffff !important; color: #000000 !important; }
+  main { max-width: 100% !important; padding: 0 !important; }
+  h1, h2, h3, .dark h1, .dark h2, .dark h3 { color: #000000 !important; }
+  p, li, .dark p, .dark li { color: #000000 !important; }
+  a { color: #000000 !important; text-decoration: none !important; }
+  article, div, section { background: #ffffff !important; border: none !important; box-shadow: none !important; }
+}
