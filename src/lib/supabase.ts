@@ -261,7 +261,7 @@ export async function subscribeNewsletter(email: string): Promise<{ ok: boolean;
   const { error } = await supabase.from('newsletter_subscribers').insert({ email: email.trim().toLowerCase() })
   if (error) return { ok: false, error: error.message }
   return { ok: true }
-}
+} /* Newsletter subscribers, admin-only read: the SECURITY DEFINER function list_newsletter_subscribers() returns the list newest first. The table has no SELECT policy, so there is no direct-table fallback. */ export interface NewsletterSubscriber { email: string; created_at: string } export async function fetchNewsletterSubscribers(): Promise<NewsletterSubscriber[]> { if (!supabase) return []; const { data, error } = await supabase.rpc('list_newsletter_subscribers'); if (error || !data) return []; return [...(data as NewsletterSubscriber[])].sort((a, b) => (b.created_at || '').localeCompare(a.created_at || '')) }
 
 export async function submitArticleFeedback(articleId: number, helpful: boolean): Promise<boolean> {
   if (!supabase) return false
