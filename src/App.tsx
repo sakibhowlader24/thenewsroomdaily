@@ -327,7 +327,7 @@ function SearchPage() {
       ) : results.length > 0 ? (
         <div className="grid md:grid-cols-2 gap-5">{results.map((a) => (<ReaderArticleCard key={a.slug} a={a} />))}</div>
       ) : (
-        {loading ? (<p className="text-[#6B7280] dark:text-slate-400">Searching...</p>) : (<p className="text-[#6B7280] dark:text-slate-400">No articles found for &ldquo;{q}&rdquo;. Try another keyword.</p>)}
+        loading ? (<p className="text-[#6B7280] dark:text-slate-400">Searching...</p>) : (<p className="text-[#6B7280] dark:text-slate-400">No articles found for &ldquo;{q}&rdquo;. Try another keyword.</p>)
       )}
     </div>
   )
@@ -345,7 +345,7 @@ function SavedPage() {
       {saved.length > 0 ? (
         <div className="grid md:grid-cols-2 gap-5">{saved.map((a) => (<ReaderArticleCard key={a.slug} a={a} />))}</div>
       ) : (
-        {loading ? (<p className="text-[#6B7280] dark:text-slate-400">Loading your saved articles...</p>) : (<p className="text-[#6B7280] dark:text-slate-400">You have no saved articles yet. Tap &ldquo;Save for later&rdquo; on any article to keep it here. <Link to="/" className="text-[#C8102E] underline">Browse the latest guides</Link></p>)}
+        loading ? (<p className="text-[#6B7280] dark:text-slate-400">Loading your saved articles...</p>) : (<p className="text-[#6B7280] dark:text-slate-400">You have no saved articles yet. Tap &ldquo;Save for later&rdquo; on any article to keep it here. <Link to="/" className="text-[#C8102E] underline">Browse the latest guides</Link></p>)
       )}
     </div>
   )
