@@ -5,6 +5,7 @@ import {
   supabase,
   supabaseConfigured,
   fetchAllArticles,
+  articleUrl,
   rowToArticle,
   articleToRow,
   fetchRevisions,
@@ -501,7 +502,7 @@ export default function Admin() {
           <p className="text-sm">Meta description: {metaLen} characters (target 150-160) {metaLen >= 150 && metaLen <= 160 ? (<span className="text-green-700 font-bold">OK</span>) : (<span className="text-red-600 font-bold">outside target</span>)}</p>
           <div className="mt-3 bg-white border rounded p-3">
             <p className="text-[#1a0dab] text-lg leading-snug">{title || 'Article title'}</p>
-            <p className="text-[#006621] text-sm">thenewsroomdaily.vercel.app/article/{slug || 'article-slug'}</p>
+            <p className="text-[#006621] text-sm">thenewsroomdaily.vercel.app/{category}/{editingId ?? 'article-id'}</p>
             <p className="text-sm text-[#545454]">{meta || excerpt || 'Meta description preview.'}</p>
           </div>
           <p className="text-sm mt-2">{words} words · about {readMinutes} min read</p>
@@ -590,7 +591,7 @@ export default function Admin() {
                 return (
                   <li key={row.id} className="bg-white border rounded p-4 flex flex-wrap justify-between gap-3">
                     <span>
-                      <Link to={'/article/' + a.slug} className="font-bold hover:underline">{a.title}</Link>
+                      <Link to={articleUrl(a)} className="font-bold hover:underline">{a.title}</Link>
                       <span className="text-[#6B7280] text-sm block">{a.category} | {a.slug} | {a.status || 'published'}{a.status === 'scheduled' && a.scheduled_at ? ' at ' + new Date(a.scheduled_at).toLocaleString() : ''} | {a.views} views{a.is_featured ? ' | Featured' : ''}</span>
                     </span>
                     <span className="flex gap-3">
