@@ -53,3 +53,6 @@ h1, h2, h3 { font-family: "Playfair Display", Merriweather, Georgia, "Times New 
   background-color: #16324F;
   box-shadow: inset 4px 0 0 0 #C8102E;
 }
+
+/* Smooth scrolling for table-of-contents jump links. */
+html { scroll-behavior: smooth; }
