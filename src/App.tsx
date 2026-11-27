@@ -21,7 +21,7 @@ import {
 } from './lib/supabase'
 import { formatBytes, uploadCoverImage } from './lib/image'
 
-function useSeo(title: string, description: string) {
+export function useSeo(title: string, description: string) {
   useEffect(() => {
     document.title = title + ' | ' + SITE_NAME
     let m = document.querySelector('meta[name="description"]')
@@ -47,7 +47,7 @@ function useArticles(): { articles: PublicArticle[]; loading: boolean } {
   return { articles, loading }
 }
 
-function countWords(text: string): number {
+export function countWords(text: string): number {
   const words = text.trim().split(/\s+/).filter(Boolean)
   return text.trim() ? words.length : 0
 }
