@@ -423,18 +423,18 @@ export function ReportCorrectionForm({ articleId }: { articleId: number }) {
 }
 
 // ---- Most read (homepage) ----
-export function MostReadList({ articles }: { articles: PublicArticle[] }) {
+export function MostReadList({ articles, compact }: { articles: PublicArticle[]; compact?: boolean }) {
   const mostRead = [...articles].sort((a, b) => (b.views ?? 0) - (a.views ?? 0)).slice(0, 5)
   if (mostRead.length === 0) return null
   return (
-    <section aria-label="Most read" className="mb-12 md:mb-16 pb-8 md:pb-10 border-b border-gray-200 dark:border-[#24405E]">
-      <div className="mb-4"><h2 className="text-lg font-bold uppercase tracking-wide text-[#0F2A44] dark:text-slate-100">Most read</h2><div className="mt-2 h-[3px] w-10 bg-[#C8102E]" /></div>
-      <ol className="grid gap-x-8 gap-y-4 md:grid-cols-2">
+    <section aria-label="Most read" className={compact ? "pt-5 md:pt-6 border-t border-gray-200 dark:border-[#24405E]" : "mb-12 md:mb-16 pb-8 md:pb-10 border-b border-gray-200 dark:border-[#24405E]"}>
+      <div className={compact ? "mb-3" : "mb-4"}><h2 className="text-lg font-bold uppercase tracking-wide text-[#0F2A44] dark:text-slate-100">Most read</h2><div className="mt-2 h-[3px] w-10 bg-[#C8102E]" /></div>
+      <ol className={compact ? "flex flex-col" : "grid gap-x-8 gap-y-4 md:grid-cols-2"}>
         {mostRead.map((a, i) => (
-          <li key={a.slug} className="flex items-start gap-4">
-            <span aria-hidden="true" className="font-serif text-3xl md:text-4xl font-black leading-none text-[#C8102E]">{i + 1}</span>
+          <li key={a.slug} className={compact ? "flex items-start gap-3 border-b border-gray-100 py-3 first:pt-0 last:border-b-0 last:pb-0 dark:border-[#24405E]/60" : "flex items-start gap-4"}>
+            <span aria-hidden="true" className="font-serif text-3xl font-black leading-none text-[#C8102E]">{i + 1}</span>
             <span>
-              <Link to={articleUrl(a)} className="text-[18px] font-bold leading-snug text-[#0F2A44] hover:text-[#C8102E] hover:underline dark:text-slate-100 dark:hover:text-white">{a.title}</Link>
+              <Link to={articleUrl(a)} className={compact ? "text-[15px] font-bold leading-snug text-[#0F2A44] hover:text-[#C8102E] hover:underline dark:text-slate-100 dark:hover:text-white" : "text-[18px] font-bold leading-snug text-[#0F2A44] hover:text-[#C8102E] hover:underline dark:text-slate-100 dark:hover:text-white"}>{a.title}</Link>
               <span className="mt-1 block text-xs text-[#6B7280] dark:text-slate-400">{a.views > 0 ? a.views + ' views' : ''}</span>
             </span>
           </li>
