@@ -4,6 +4,7 @@ import { ARTICLES } from './data/articles'
 import { CATEGORIES, SITE_NAME, SITE_URL, categoryBySlug } from './data/site'
 import {
   fetchPublishedArticles, fetchArticleBySlug, fetchRelatedArticles, isDuePublished,
+  fetchArticleById, articleUrl,
   incrementArticleViews,
   fetchHomepageCategories,
   ALL_CATEGORY_SLUGS,
@@ -51,7 +52,7 @@ function ArticleCard({ a }: { a: PublicArticle }) {
         {cat ? cat.name : a.category}
         {a.is_featured && (<span className="ml-2 bg-[#C8102E] text-white px-2 py-0.5 rounded normal-case tracking-normal">Featured</span>)}
       </p>
-      <h3 className="text-xl font-bold mt-2 leading-snug"><Link to={'/article/' + a.slug} className="hover:underline">{a.title}</Link></h3>
+      <h3 className="text-xl font-bold mt-2 leading-snug"><Link to={articleUrl(a)} className="hover:underline">{a.title}</Link>Link></h3>h3></h3>
       <p className="text-[#6B7280] mt-2">{a.excerpt}</p>
       <p className="text-sm text-[#6B7280] mt-3">{a.date} | {a.author}{a.views > 0 ? ' | ' + a.views + ' views' : ''}</p>
     </article>
@@ -133,10 +134,10 @@ function Home() {
       {latest && (
         <section className="bg-white border rounded-lg p-5 shadow-sm mb-8 md:p-6 md:mb-10">
           <p className="text-xs font-bold uppercase tracking-wide text-[#C8102E]">Latest article</p>
-          <h1 className="text-3xl md:text-4xl font-black mt-2 leading-tight"><Link to={'/article/' + latest.slug} className="hover:underline">{latest.title}</Link></h1>
+          <h1 className="text-3xl md:text-4xl font-black mt-2 leading-tight"><Link to={articleUrl(latest)} className="hover:underline">{latest.title}</Link>Link></h1>h1></h1>
           <p className="text-[#6B7280] mt-3 text-lg">{latest.excerpt}</p>
           <p className="text-sm text-[#6B7280] mt-3">{latest.date} | {latest.author}</p>
-          <Link to={'/article/' + latest.slug} className="inline-block mt-4 bg-[#C8102E] text-white font-bold px-4 py-2 rounded">Read the guide</Link>
+          <Link to={articleUrl(latest)} className="inline-block mt-4 bg-[#C8102E] text-white font-bold px-4 py-2 rounded">Read the guide</Link>
         </section>
       )}
       {featured.length > 0 && (
@@ -161,10 +162,21 @@ function Home() {
   )
 }
 
-function ArticlePage() {
+// Legacy /article/:slug URLs redirect to the new /:category/:id form.
+function LegacyArticleRedirect() {
   const { slug } = useParams()
+    const [target, setTarget] = useState<string | null>(null)
+      const [missing, setMissing] = useState(false)
+          useEffect(() => { let live = true; fetchArticleBySlug(slug ?? '').then((found) => { if (!live) return; const visible = found && isDuePublished(found.status, found.scheduled_at) ? found : null; const article = visible ?? (ARTICLES.find((x) => x.slug === slug) as PublicArticle | undefined) ?? null; if (article && article.id != null) setTarget(articleUrl(article)); else setMissing(true) }).catch(() => { if (live) setMissing(true) }); return () => { live = false } }, [slug])
+            if (missing) return (<div><h1 className="text-3xl font-bold">Article not found</h1><p className="mt-3"><Link to="/" className="text-[#C8102E] underline">Back to home</Link></p></div>)
+              if (target) return <Navigate to={target} replace />
+  return (<div className="flex flex-col items-center justify-center py-16"><div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-[#C8102E]" /><p className="mt-4 text-[#6B7280]">Loading...</p></div>)
+}
+                function ArticlePage() {
+  const { category, id } = useParams()
+  const numericId = Number(id)
   const [a, setA] = useState<PublicArticle | null>(null); const [loading, setLoading] = useState(true); const [related, setRelated] = useState<PublicArticle[]>([])
-  useEffect(() => { let live = true; setLoading(true); setA(null); setRelated([]); fetchArticleBySlug(slug ?? '').then((found) => { if (!live) return; const visible = found && isDuePublished(found.status, found.scheduled_at) ? found : null; const article = visible ?? (ARTICLES.find((x) => x.slug === slug) as PublicArticle | undefined) ?? null; setA(article); if (article) fetchRelatedArticles(article.category, article.slug).then((list) => { if (live) setRelated(list) }).catch(() => {}) }).catch(() => { if (live) setA((ARTICLES.find((x) => x.slug === slug) as PublicArticle | undefined) ?? null) }).finally(() => { if (live) setLoading(false) }); return () => { live = false } }, [slug])
+  useEffect(() => { let live = true; setLoading(true); setA(null); setRelated([]); fetchArticleById(numericId).then((found) => { if (!live) return; const visible = found && isDuePublished(found.status, found.scheduled_at) ? found : null; const article = visible ?? (ARTICLES.find((x) => x.id === numericId) as PublicArticle | undefined) ?? null; setA(article); if (article) fetchRelatedArticles(article.category, article.slug).then((list) => { if (live) setRelated(list) }).catch(() => {}) }).catch(() => { if (live) setA((ARTICLES.find((x) => x.id === numericId) as PublicArticle | undefined) ?? null) }).finally(() => { if (live) setLoading(false) }); return () => { live = false } }, [category, numericId])
   useSeo(loading && !a ? 'Loading...' : a ? a.title : 'Article not found', a ? a.description : 'This article could not be found.')
   useEffect(() => {
     if (!a) return
@@ -175,7 +187,8 @@ function ArticlePage() {
     }
   }, [a?.slug])
   if (loading && !a) return (<div className="flex flex-col items-center justify-center py-16"><div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-[#C8102E]" /><p className="mt-4 text-[#6B7280]">Loading...</p></div>); if (!a) return (<div><h1 className="text-3xl font-bold">Article not found</h1><p className="mt-3"><Link to="/" className="text-[#C8102E] underline">Back to home</Link></p></div>)
-  const cat = categoryBySlug(a.category)
+  if (a && a.category !== category) return <Navigate to={articleUrl(a)} replace />
+    const cat = categoryBySlug(a.category)
   // Related articles are fetched in the effect above with fetchRelatedArticles.
   const words = countWords(a.content.join(' '))
   const readMinutes = Math.max(1, Math.ceil(words / 200))
@@ -280,7 +293,8 @@ export default function App() {
       <Layout>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/article/:slug" element={<ArticlePage />} />
+          <Route path="/:category/:id" element={<ArticlePage />} />
+          <Route path="/article/:slug" element={<LegacyArticleRedirect />} />
           <Route path="/category/:slug" element={<CategoryPage />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
