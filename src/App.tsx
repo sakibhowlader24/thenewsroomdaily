@@ -315,7 +315,7 @@ function CategoryPage() {
 function SearchPage() {
   const [params] = useSearchParams()
   const q = (params.get('q') || '').trim()
-  const { articles } = useArticles()
+  const { articles, loading } = useArticles()
   const results = searchArticles(articles, q)
   useSeo(q ? 'Search: ' + q : 'Search', q ? 'Search results for ' + q + ' on The Newsroom Daily.' : 'Search The Newsroom Daily guides.')
   return (
@@ -327,7 +327,7 @@ function SearchPage() {
       ) : results.length > 0 ? (
         <div className="grid md:grid-cols-2 gap-5">{results.map((a) => (<ReaderArticleCard key={a.slug} a={a} />))}</div>
       ) : (
-        <p className="text-[#6B7280] dark:text-slate-400">No articles found for &ldquo;{q}&rdquo;. Try another keyword.</p>
+        {loading ? (<p className="text-[#6B7280] dark:text-slate-400">Searching...</p>) : (<p className="text-[#6B7280] dark:text-slate-400">No articles found for &ldquo;{q}&rdquo;. Try another keyword.</p>)}
       )}
     </div>
   )
@@ -335,7 +335,7 @@ function SearchPage() {
 
 function SavedPage() {
   useSeo('Saved articles', 'Articles you saved for later on The Newsroom Daily.')
-  const { articles } = useArticles()
+  const { articles, loading } = useArticles()
   const { savedIds } = useBookmarks()
   const saved = articles.filter((a) => a.id != null && savedIds.includes(a.id))
   return (
@@ -345,7 +345,7 @@ function SavedPage() {
       {saved.length > 0 ? (
         <div className="grid md:grid-cols-2 gap-5">{saved.map((a) => (<ReaderArticleCard key={a.slug} a={a} />))}</div>
       ) : (
-        <p className="text-[#6B7280] dark:text-slate-400">You have no saved articles yet. Tap &ldquo;Save for later&rdquo; on any article to keep it here. <Link to="/" className="text-[#C8102E] underline">Browse the latest guides</Link></p>
+        {loading ? (<p className="text-[#6B7280] dark:text-slate-400">Loading your saved articles...</p>) : (<p className="text-[#6B7280] dark:text-slate-400">You have no saved articles yet. Tap &ldquo;Save for later&rdquo; on any article to keep it here. <Link to="/" className="text-[#C8102E] underline">Browse the latest guides</Link></p>)}
       )}
     </div>
   )
