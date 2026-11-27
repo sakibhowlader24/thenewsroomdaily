@@ -66,18 +66,18 @@ const relativeDay = (s: string): string => { const d = new Date(s); if (Number.i
   const articleId = a.id
   const saved = articleId != null && isSaved(articleId)
   return (
-    <article className="bg-white border rounded-lg overflow-hidden shadow-sm dark:bg-[#122840] dark:border-[#24405E]">
+    <article className="pb-6 border-b border-gray-200 dark:border-[#24405E]">
       {a.cover && (
         <Link to={articleUrl(a)} aria-label={a.title}>
           <img src={a.cover} alt={a.cover_alt || a.title} loading="lazy" className="w-full aspect-video object-cover" />
         </Link>
   )}
-      <div className="p-5">
+      <div className="pt-4">
         <p className="text-xs font-bold tracking-wide text-[#C8102E]">{cat?.name.toUpperCase()}</p>
-        <h3 className="text-xl font-bold mt-2 leading-snug">
+        <h3 className="text-[22px] font-bold mt-2 leading-snug">
           <Link to={articleUrl(a)} className="hover:text-[#C8102E] hover:underline">{a.title}</Link>
         </h3>
-        <p className="text-[#6B7280] mt-2">{a.excerpt}</p>
+        <p className="text-[#6B7280] mt-2 line-clamp-1">{a.excerpt}</p>
         <span className="flex items-end justify-between gap-3">
           <p className="text-sm text-[#6B7280] mt-3">{a.date} | The Newsroom Daily{a.views > 0 ? ` \u00B7 ${a.views} views` : ''}</p>
           <button onClick={() => { if (articleId != null) toggleSaved(articleId) }} disabled={articleId == null} className="shrink-0 border rounded-full px-3 py-1 text-xs font-bold hover:border-[#C8102E] hover:text-[#C8102E]">{saved ? 'Saved' : 'Save'}</button>
@@ -98,7 +98,7 @@ function RelatedArticles({ a }: { a: PublicArticle }) {
   return (
     <section className="mt-8 print-hidden">
       <h2 className="text-2xl font-bold">Related articles</h2>
-      <div className="grid gap-4 md:grid-cols-2 mt-4">
+      <div className="grid gap-6 md:grid-cols-2 mt-6">
         {related.map((r) => (<ArticleCard key={r.slug} a={r} />))}
       </div>
     </section>
@@ -216,26 +216,25 @@ function Home() {
             <Link to={articleUrl(latest)} className="inline-block mt-4 bg-[#C8102E] text-white font-bold px-4 py-2 rounded hover:bg-[#A50D26]">Read the guide &rarr;</Link></div></div><div className="md:col-span-2 flex flex-col gap-6 md:gap-8 md:border-l md:border-gray-200 md:dark:border-[#24405E] md:pl-6">{nextTwo.map((a) => (<article key={a.slug} className="flex gap-4 items-start border-b border-gray-200 dark:border-[#24405E] pb-6 last:border-b-0 last:pb-0"><div className="min-w-0 flex-1"><p className="text-xs font-bold tracking-widest text-[#C8102E]">{(categoryBySlug(a.category)?.name ?? a.category).toUpperCase()}</p><h2 className="text-lg font-bold leading-snug mt-1"><Link to={articleUrl(a)} className="hover:text-[#C8102E] hover:underline">{a.title}</Link></h2><p className="text-sm text-[#6B7280] mt-1 line-clamp-1">{a.excerpt}</p></div>{a.cover && (<Link to={articleUrl(a)} className="shrink-0"><img src={a.cover} alt={a.cover_alt || a.title} className="w-24 h-24 md:w-28 md:h-28 object-cover" /></Link>)}</article>))}</div></div></section>
       )}
       <MostReadList articles={visible} />
-      <h2 className="text-2xl font-bold mb-4">Latest articles</h2>
-      <div className="grid gap-4 md:grid-cols-2 mb-8 md:mb-10">
+      <div className="mb-4"><h2 className="text-lg font-bold uppercase tracking-wide text-[#0F2A44] dark:text-slate-100">Latest articles</h2><div className="mt-2 h-[3px] w-10 bg-[#C8102E]" /></div>
+      <div className="grid gap-6 md:grid-cols-3 mb-12 md:mb-16">
         {visible.slice(0, 6).map((a) => (<ArticleCard key={a.slug} a={a} />))}
-      </div>
-      {shownCategories.map((c) => {
+      </div><div className="mb-12 md:mb-16 border-t border-gray-200 dark:border-[#24405E]">{visible.slice(6).map((a) => (<article key={a.slug} className="flex flex-col gap-1 border-b border-gray-200 dark:border-[#24405E] py-4"><h3 className="text-[18px] font-bold leading-snug"><Link to={articleUrl(a)} className="hover:text-[#C8102E] hover:underline">{a.title}</Link></h3><p className="text-sm text-[#6B7280] line-clamp-1">{a.excerpt}</p><p className="text-xs text-[#6B7280]">{relativeDay(a.date)}</p></article>))}</div>{shownCategories.map((c) => {
         const list = visible.filter((a) => a.category === c.slug)
         if (list.length === 0) {
           return (
-            <section key={c.slug} className="mb-8 md:mb-10">
-              <h2 className="text-2xl font-bold"><Link to={'/category/' + c.slug} className="hover:text-[#C8102E] hover:underline">{c.name}</Link></h2>
+            <section key={c.slug} className="mb-12 md:mb-16">
+              <div className="flex items-end justify-between gap-4 mb-4"><div><h2 className="text-lg font-bold uppercase tracking-wide text-[#0F2A44] dark:text-slate-100"><Link to={'/category/' + c.slug} className="hover:text-[#C8102E] hover:underline">{c.name}</Link></h2><div className="mt-2 h-[3px] w-10 bg-[#C8102E]" /></div><Link to={'/category/' + c.slug} className="shrink-0 text-sm font-bold text-[#C8102E] hover:underline">View all &rarr;</Link></div>
               <p className="text-[#6B7280] mt-2">{c.description}</p>
               <p className="text-[#6B7280] mt-2">More guides in this category are coming soon.</p>
             </section>
           )
         }
         return (
-          <section key={c.slug} className="mb-8 md:mb-10">
-            <h2 className="text-2xl font-bold"><Link to={'/category/' + c.slug} className="hover:text-[#C8102E] hover:underline">{c.name}</Link></h2>
+          <section key={c.slug} className="mb-12 md:mb-16">
+            <div className="flex items-end justify-between gap-4 mb-4"><div><h2 className="text-lg font-bold uppercase tracking-wide text-[#0F2A44] dark:text-slate-100"><Link to={'/category/' + c.slug} className="hover:text-[#C8102E] hover:underline">{c.name}</Link></h2><div className="mt-2 h-[3px] w-10 bg-[#C8102E]" /></div><Link to={'/category/' + c.slug} className="shrink-0 text-sm font-bold text-[#C8102E] hover:underline">View all &rarr;</Link></div>
             <p className="text-[#6B7280] mt-2">{c.description}</p>
-            <div className="grid gap-4 md:grid-cols-2 mt-4">
+            <div className="grid gap-6 md:grid-cols-2 mt-6">
               {list.slice(0, 4).map((a) => (<ArticleCard key={a.slug} a={a} />))}
             </div>
           </section>
