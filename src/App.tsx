@@ -71,7 +71,7 @@ function ArticleCard({ a }: { a: PublicArticle }) {
         <Link to={articleUrl(a)} aria-label={a.title}>
           <img src={a.cover} alt={a.cover_alt || a.title} loading="lazy" className="w-full aspect-video object-cover" />
         </Link>
-      )}
+  )}
       <div className="p-5">
         <p className="text-xs font-bold tracking-wide text-[#C8102E]">{cat?.name.toUpperCase()}</p>
         <h3 className="text-xl font-bold mt-2 leading-snug">
@@ -79,7 +79,7 @@ function ArticleCard({ a }: { a: PublicArticle }) {
         </h3>
         <p className="text-[#6B7280] mt-2">{a.excerpt}</p>
         <span className="flex items-end justify-between gap-3">
-          <p className="text-sm text-[#6B7280] mt-3">{a.date} | The Newsroom Daily{a.views > 0 ? ` · ${a.views} views` : ''}</p>
+          <p className="text-sm text-[#6B7280] mt-3">{a.date} | The Newsroom Daily{a.views > 0 ? ` \u00B7 ${a.views} views` : ''}</p>
           <button onClick={() => { if (articleId != null) toggleSaved(articleId) }} disabled={articleId == null} className="shrink-0 border rounded-full px-3 py-1 text-xs font-bold hover:border-[#C8102E] hover:text-[#C8102E]">{saved ? 'Saved' : 'Save'}</button>
         </span>
       </div>
@@ -128,16 +128,16 @@ function Layout({ children }: { children: ReactNode }) {
             </button>
             <Link to="/" className="text-center py-3 md:py-4 hover:opacity-90 min-w-0" aria-label="The Newsroom Daily home">
               <span className="block font-serif font-black text-[1.7rem] md:text-4xl leading-none tracking-tight text-[#0F2A44] dark:text-white">The Newsroom</span>
-              <span className="mt-1 flex items-center justify-center gap-2 text-[#C8102E] font-black tracking-[0.35em] md:tracking-[0.45em] text-xs md:text-sm">DAILY <span className="inline-block w-3 h-3 bg-[#C8102E]" /></span>
+              <span className="mt-1 flex items-center justify-center gap-2 text-[#C8102E] font-black tracking-[0.35em] md:tracking-[0.45em] text-xs md:text-sm">DAILY <span className="inline-block w-3 h-3 bg-[#C8102E]" aria-hidden="true" /></span>
             </Link>
             <span className="flex items-center gap-1.5 shrink-0">
               <button type="button" className="md:hidden w-9 h-9 flex items-center justify-center rounded-full border border-gray-300 hover:border-[#C8102E] hover:text-[#C8102E] dark:border-[#24405E] dark:hover:border-[#C8102E]" aria-label={searchOpen ? 'Close search' : 'Open search'} aria-expanded={searchOpen} onClick={() => { setSearchOpen(!searchOpen); setMenuOpen(false) }}>
-                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3" /></svg>
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" /></svg>
               </button>
-              <button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} className="w-9 h-9 flex items-center justify-center rounded-full border border-gray-300 hover:border-[#C8102E] hover:text-[#C8102E] dark:border-[#24405E] dark:hover:border-[#C8102E]">{theme === 'dark' ? '☀️' : '🌙'}</button>
+              <button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} className="w-9 h-9 md:w-auto md:p-2 flex items-center justify-center rounded-full border border-gray-300 hover:border-[#C8102E] hover:text-[#C8102E] dark:border-[#24405E] dark:hover:border-[#C8102E]">{theme === 'dark' ? '\u2600\uFE0F' : '\uD83C\uDF19'}</button>
             </span>
           </div>
-          <nav className="hidden md:flex flex-wrap items-center gap-4 text-sm font-bold md:gap-6 md:justify-center">
+          <nav className="hidden md:flex flex-wrap items-center gap-4 text-sm font-bold md:gap-6 md:justify-center pb-3 md:pb-4">
             <Link to="/" className="menu-link">Home</Link>
             {CATEGORIES.map((c) => (<Link key={c.slug} to={'/category/' + c.slug} className="menu-link">{c.name}</Link>))}
             <Link to="/about" className="menu-link">About</Link>
@@ -350,7 +350,7 @@ function ArticlePage() {
       <ReadingProgressBar />
       <p className="text-xs font-bold tracking-wide text-[#C8102E]">{categoryBySlug(a.category)?.name.toUpperCase()}</p>
       <h1 className="text-3xl md:text-4xl font-black mt-2 leading-tight">{a.title}</h1>
-      <p className="text-sm text-[#6B7280] mt-3">{a.date} | The Newsroom Daily | {minutes} min read{a.views > 0 ? ` · ${a.views} views` : ''}</p>
+      <p className="text-sm text-[#6B7280] mt-3">{a.date} | The Newsroom Daily | {minutes} min read{a.views > 0 ? ` \u00B7 ${a.views} views` : ''}</p>
       <div className="mt-4 flex flex-nowrap items-center gap-1.5 overflow-x-auto print-hidden" data-testid="reader-controls" aria-label="Article toolbar">
         <FontSizeControl size={fontSize} onChange={setFontSize} />
         <ListenControl text={a.content.join(' ')} title={a.title} />
@@ -379,7 +379,7 @@ function ArticlePage() {
           return <p key={i} id={blockAnchorId(a.content, i)} className="scroll-mt-24">{block}</p>
         })}
       </div>
-      {a.corrected_at && <p data-testid="article-corrected" className="mt-3 text-sm text-[#6B7280] dark:text-slate-400">Corrected {formatUsDate(a.corrected_at)}</p>}
+      {a.corrected_at && <p data-testid="article-corrected" className="mt-3 text-sm text-[#6B7280] dark:text-slate-400">Corrected: {formatUsDate(a.corrected_at)}</p>}
       {a.id != null && <ArticleFeedback articleId={a.id} />}
       {a.id != null && <ReportCorrectionForm articleId={a.id} />}
       <div className="mt-6 print-hidden">
@@ -411,7 +411,7 @@ function ContactPage() {
       <h1 className="text-3xl font-black">Contact</h1>
       <div className="mt-4 space-y-4 leading-relaxed bg-white border rounded-lg p-6 shadow-sm dark:bg-[#122840] dark:border-[#24405E]">
         <p>Questions, corrections, or story ideas? Write to us and we will get back to you.</p>
-        <p>Email: <a href="mailto:rtvsakib@gmail.com" className="text-[#C8102E] underline">rtvsakib@gmail.com</a>.</p>
+        <p>Email: <a href="mailto:rtvsakib@gmail.com" className="text-[#C8102E] underline">rtvsakib@gmail.com</a></p>
       </div>
     </div>
   )
@@ -427,7 +427,7 @@ function PrivacyPage() {
         <p>The Newsroom Daily collects as little as possible. Bookmarks are stored only in your browser, and reading progress is not sent to us.</p>
         <p>If you subscribe to the newsletter, we store only the email address you enter, and only to send you our guides. We do not sell or share it.</p>
         <p>If you vote on whether an article was helpful, we store only your answer and the article, with no name or email attached.</p>
-        <p>If you report a correction, we store the wrong line, the suggested correction, the source link, and any name or email you choose to share, only so we can review the report.</p>
+        <p>If you report a correction, we store the wrong line, the suggested correction, the source link, and the name and email you choose to share, only so we can review the report.</p>
         <p>Contact us at <a href="mailto:rtvsakib@gmail.com" className="text-[#C8102E] underline">rtvsakib@gmail.com</a> with any privacy question.</p>
       </div>
     </div>
