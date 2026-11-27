@@ -277,7 +277,7 @@ function Privacy() {
   return (
     <div className="bg-white border rounded-lg p-6 shadow-sm space-y-4 text-lg leading-relaxed">
       <h1 className="text-3xl font-black">Privacy Policy</h1>
-      <p>Last updated: 25 November 2026.</p>
+      <p>Last updated: November 25, 2026.</p>
       <p>{SITE_NAME} does not sell personal information. This site does not use advertising trackers at launch, and it does not run Google AdSense.</p>
       <p>If you use the contact form, we receive the name, email address, and message you type. We use that only to read and reply to your message. We do not share it with other parties.</p>
       <p>This site may use basic, privacy friendly visit counts from its host to understand which pages are read. Those counts do not identify individual readers.</p>
