@@ -37,14 +37,14 @@ function useSeo(title: string, description: string) {
   }, [title, description])
 }
 
-function useArticles(): PublicArticle[] {
-  const [articles, setArticles] = useState<PublicArticle[]>(ARTICLES as PublicArticle[])
+function useArticles(): { articles: PublicArticle[]; loading: boolean } {
+  const [articles, setArticles] = useState<PublicArticle[]>(ARTICLES as PublicArticle[]); const [loading, setLoading] = useState(true)
   useEffect(() => {
     let live = true
-    fetchPublishedArticles().then((list) => { if (live) setArticles(list) })
+    fetchPublishedArticles().then((list) => { if (live) setArticles(list) }).catch(() => {}).finally(() => { if (live) setLoading(false) })
     return () => { live = false }
   }, [])
-  return articles
+  return { articles, loading }
 }
 
 function countWords(text: string): number {
@@ -132,7 +132,7 @@ function Layout({ children }: { children: React.ReactNode }) {
 
 function Home() {
   useSeo('Home', 'Clear, practical guides on GTA 6 gaming, tech how-to, money and finance, career and work, and everyday life.')
-  const articles = useArticles()
+  const { articles } = useArticles()
   const [enabledCategories, setEnabledCategories] = useState<string[]>(ALL_CATEGORY_SLUGS)
   useEffect(() => { fetchHomepageCategories().then(setEnabledCategories) }, [])
   const visible = articles.filter((a) => enabledCategories.includes(a.category))
@@ -173,9 +173,9 @@ function Home() {
 
 function ArticlePage() {
   const { slug } = useParams()
-  const articles = useArticles()
+  const { articles, loading } = useArticles()
   const a = articles.find((x) => x.slug === slug)
-  useSeo(a ? a.title : 'Article not found', a ? a.description : 'This article could not be found.')
+  useSeo(loading && !a ? 'Loading...' : a ? a.title : 'Article not found', a ? a.description : 'This article could not be found.')
   useEffect(() => {
     if (!a) return
     const key = 'viewed-' + a.slug
@@ -184,7 +184,7 @@ function ArticlePage() {
       void incrementArticleViews(a.slug)
     }
   }, [a?.slug])
-  if (!a) return (<div><h1 className="text-3xl font-bold">Article not found</h1><p className="mt-3"><Link to="/" className="text-[#C8102E] underline">Back to home</Link></p></div>)
+  if (loading && !a) return (<div className="flex flex-col items-center justify-center py-16"><div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-[#C8102E]" /><p className="mt-4 text-[#6B7280]">Loading...</p></div>); if (!a) return (<div><h1 className="text-3xl font-bold">Article not found</h1><p className="mt-3"><Link to="/" className="text-[#C8102E] underline">Back to home</Link></p></div>)
   const cat = categoryBySlug(a.category)
   const related = articles.filter((x) => x.category === a.category && x.slug !== a.slug)
   const words = countWords(a.content.join(' '))
@@ -210,7 +210,7 @@ function CategoryPage() {
   const cat = slug ? categoryBySlug(slug) : undefined
   useSeo(cat ? cat.name : 'Category not found', cat ? cat.description : 'This category could not be found.')
   if (!cat) return (<div><h1 className="text-3xl font-bold">Category not found</h1><p className="mt-3"><Link to="/" className="text-[#C8102E] underline">Back to home</Link></p></div>)
-  const articles = useArticles()
+  const { articles } = useArticles()
   const list = articles.filter((a) => a.category === cat.slug)
   return (
     <div>
