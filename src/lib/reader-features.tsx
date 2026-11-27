@@ -9,130 +9,238 @@ import {
   type PublicArticle,
 } from './supabase'
 
-// ---- Font size control (article pages) ----
-export type ArticleFontSize = 'small' | 'medium' | 'large'
+// ---- Font size control (article pages): 90 / 100 / 110 / 125 / 150 percent ----
+// The storage key is unchanged ('newsroom-article-font-size') so readers keep
+// their setting. Old values map to the closest new step: small -> 90, medium -> 100, large -> 125.
+export type ArticleFontSize = '90' | '100' | '110' | '125' | '150'
 export const FONT_SIZE_KEY = 'newsroom-article-font-size'
+export const FONT_SIZE_STEPS: ArticleFontSize[] = ['90', '100', '110', '125', '150']
 
 export function getSavedFontSize(): ArticleFontSize {
   try {
     const saved = localStorage.getItem(FONT_SIZE_KEY)
-    if (saved === 'small' || saved === 'medium' || saved === 'large') return saved
+    if (saved === 'small') return '90'
+    if (saved === 'medium') return '100'
+    if (saved === 'large') return '125'
+    if (saved === '90' || saved === '100' || saved === '110' || saved === '125' || saved === '150') return saved
+    if (saved === '90%' || saved === '100%' || saved === '110%' || saved === '125%' || saved === '150%') return saved.slice(0, -1) as ArticleFontSize
   } catch {
     // ignore
   }
-  return 'medium'
+  return '100'
 }
 
 export const ARTICLE_FONT_SIZE_PX: Record<ArticleFontSize, string> = {
-  small: '1rem',
-  medium: '1.125rem',
-  large: '1.375rem',
+  '90': '1rem',
+  '100': '1.125rem',
+  '110': '1.25rem',
+  '125': '1.406rem',
+  '150': '1.688rem',
 }
 
+const iconButtonClass = 'flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[#0F2A44]/20 bg-white text-[#0F2A44] hover:border-[#C8102E] hover:text-[#C8102E] disabled:opacity-40 dark:border-[#24405E] dark:bg-[#122840] dark:text-slate-100 dark:hover:border-[#C8102E] dark:hover:text-white'
+
 export function FontSizeControl({ size, onChange }: { size: ArticleFontSize; onChange: (next: ArticleFontSize) => void }) {
-  const options: { value: ArticleFontSize; label: string; aria: string }[] = [
-    { value: 'small', label: 'A-', aria: 'Small text size' },
-    { value: 'medium', label: 'A', aria: 'Medium text size' },
-    { value: 'large', label: 'A+', aria: 'Large text size' },
-  ]
+  const index = FONT_SIZE_STEPS.indexOf(size)
+  const safeIndex = index < 0 ? 1 : index
+  const decrease = () => { if (safeIndex > 0) onChange(FONT_SIZE_STEPS[safeIndex - 1]) }
+  const increase = () => { if (safeIndex < FONT_SIZE_STEPS.length - 1) onChange(FONT_SIZE_STEPS[safeIndex + 1]) }
   return (
-    <div data-testid="font-size-control" role="group" aria-label="Text size" className="flex items-center gap-2">
-      <span className="text-sm font-bold text-[#0F2A44] dark:text-slate-100">Text size:</span>
-      {options.map((option) => (
-        <button
-          key={option.value}
-          type="button"
-          aria-label={option.aria}
-          aria-pressed={size === option.value}
-          onClick={() => onChange(option.value)}
-          className={size === option.value ? 'rounded-full bg-[#C8102E] px-3 py-1 text-sm font-bold text-white' : 'rounded-full border border-[#0F2A44]/20 bg-white px-3 py-1 text-sm font-bold text-[#0F2A44] hover:border-[#C8102E] hover:text-[#C8102E] dark:border-[#24405E] dark:bg-[#122840] dark:text-slate-100 dark:hover:border-[#C8102E] dark:hover:text-white'}
-        >
-          {option.label}
-        </button>
-      ))}
-    </div>
+    <span data-testid="font-size-control" role="group" aria-label="Text size" className="inline-flex shrink-0 items-center gap-1">
+      <button type="button" data-testid="font-size-decrease" aria-label="Decrease text size" disabled={safeIndex <= 0} onClick={decrease} className={iconButtonClass}>
+        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3" /><path d="M8 11h6" /></svg>
+      </button>
+      <span data-testid="font-size-percent" aria-live="polite" className="w-10 shrink-0 text-center text-xs font-bold text-[#C8102E] dark:text-[#FF6B81]">{size}%</span>
+      <button type="button" data-testid="font-size-increase" aria-label="Increase text size" disabled={safeIndex >= FONT_SIZE_STEPS.length - 1} onClick={increase} className={iconButtonClass}>
+        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3" /><path d="M11 8v6M8 11h6" /></svg>
+      </button>
+    </span>
   )
 }
 
-// ---- Print / PDF (article pages) ----
+// ---- Print / PDF (article pages): icon-only button ----
 export function PrintButton() {
   return (
-    <button
-      type="button"
-      data-testid="print-button"
-      onClick={() => window.print()}
-      className="rounded-full border border-[#0F2A44]/20 bg-white px-3 py-1 text-sm font-bold text-[#0F2A44] hover:border-[#C8102E] hover:text-[#C8102E] dark:border-[#24405E] dark:bg-[#122840] dark:text-slate-100 dark:hover:border-[#C8102E] dark:hover:text-white"
-    >
-      Print / Save as PDF
+    <button type="button" data-testid="print-button" onClick={() => window.print()} aria-label="Print / Save as PDF" title="Print / Save as PDF" className={iconButtonClass}>
+      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 9V2h12v7" /><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" /><path d="M6 14h12v8H6z" /></svg>
     </button>
   )
 }
 
 // ---- Listen (text-to-speech, article pages) ----
+// Mobile browsers load speech voices asynchronously: getVoices() is often empty
+// on the first tap, and speaking before a voice is ready (or cancelling and
+// speaking in the same tick) can kill the utterance silently. So we wait for
+// voiceschanged (with a timeout), cancel cleanly before starting, prefer an
+// en-US voice, and speak the article in short chunks, one after another.
 type ListenStatus = 'idle' | 'playing' | 'paused'
+
+export function splitSpeechChunks(text: string): string[] {
+  const clean = text.replace(/\s+/g, ' ').trim()
+  if (!clean) return []
+  const sentences = clean.match(/[^.!?]+[.!?]+["')\]]*\s*|[^.!?]+$/g) || [clean]
+  const chunks: string[] = []
+  let current = ''
+  for (const sentence of sentences) {
+    const part = sentence.trim()
+    if (!part) continue
+    if (current && (current + ' ' + part).length > 220) {
+      chunks.push(current.trim())
+      current = part
+    } else {
+      current = current ? current + ' ' + part : part
+    }
+    while (current.length > 220) {
+      chunks.push(current.slice(0, 220).trim())
+      current = current.slice(220).trim()
+    }
+  }
+  if (current.trim()) chunks.push(current.trim())
+  return chunks
+}
+
+function waitForVoices(synth: SpeechSynthesis): Promise<void> {
+  return new Promise((resolve) => {
+    if (synth.getVoices().length > 0) { resolve(); return }
+    let done = false
+    const finish = () => {
+      if (done) return
+      done = true
+      synth.removeEventListener('voiceschanged', finish)
+      resolve()
+    }
+    synth.addEventListener('voiceschanged', finish)
+    window.setTimeout(finish, 2000)
+  })
+}
+
+function pickEnUsVoice(synth: SpeechSynthesis): SpeechSynthesisVoice | null {
+  const voices = synth.getVoices()
+  if (voices.length === 0) return null
+  return (
+    voices.find((v) => v.lang === 'en-US') ||
+    voices.find((v) => v.lang.startsWith('en-US')) ||
+    voices.find((v) => v.lang.startsWith('en')) ||
+    voices[0]
+  )
+}
 
 export function ListenControl({ text, title }: { text: string; title: string }) {
   const [status, setStatus] = useState<ListenStatus>('idle')
   const [supported, setSupported] = useState(false)
-  const startTimer = useRef<number | null>(null)
+  const [error, setError] = useState('')
+  const runIdRef = useRef(0)
+  const chunkIndexRef = useRef(0)
+  const chunksRef = useRef<string[]>([])
+  const statusRef = useRef<ListenStatus>('idle')
+  const setListenStatus = (next: ListenStatus) => { statusRef.current = next; setStatus(next) }
   useEffect(() => {
-    setSupported('speechSynthesis' in window && 'SpeechSynthesisUtterance' in window)
+    const ok = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window
+    setSupported(ok)
+    if (ok) { try { window.speechSynthesis.getVoices() } catch { /* ignore */ } }
     return () => {
-      if (startTimer.current !== null) window.clearTimeout(startTimer.current)
-      if ('speechSynthesis' in window) window.speechSynthesis.cancel()
+      runIdRef.current += 1
+      if ('speechSynthesis' in window) { try { window.speechSynthesis.cancel() } catch { /* ignore */ } }
     }
   }, [])
   const stop = () => {
-    if (startTimer.current !== null) window.clearTimeout(startTimer.current)
-    if ('speechSynthesis' in window) window.speechSynthesis.cancel()
-    setStatus('idle')
+    runIdRef.current += 1
+    if ('speechSynthesis' in window) { try { window.speechSynthesis.cancel() } catch { /* ignore */ } }
+    setError('')
+    setListenStatus('idle')
   }
-  const start = () => {
-    if (!('speechSynthesis' in window)) return
+  const speakChunk = (index: number, run: number) => {
+    if (run !== runIdRef.current) return
+    const chunks = chunksRef.current
+    if (index >= chunks.length) { setListenStatus('idle'); return }
+    chunkIndexRef.current = index
     const synth = window.speechSynthesis
-    synth.cancel()
-    const startedAt = Date.now()
-    startTimer.current = window.setTimeout(() => {
-      const utterance = new SpeechSynthesisUtterance(title + '. ' + text)
-      utterance.lang = 'en-US'
-      utterance.rate = 1
-      const voices = synth.getVoices()
-      const voice =
-        voices.find((v) => v.lang === 'en-US') ||
-        voices.find((v) => v.lang.startsWith('en-US')) ||
-        voices.find((v) => v.lang.startsWith('en'))
-      if (voice) utterance.voice = voice
-      const finish = () => {
-        if (Date.now() - startedAt > 1000) setStatus('idle')
-      }
-      utterance.onend = finish
-      utterance.onerror = finish
-      synth.speak(utterance)
-      setStatus('playing')
-    }, 100)
+    const utterance = new SpeechSynthesisUtterance(chunks[index])
+    utterance.lang = 'en-US'
+    utterance.rate = 1
+    const voice = pickEnUsVoice(synth)
+    if (voice) utterance.voice = voice
+    utterance.onend = () => { if (run === runIdRef.current) speakChunk(index + 1, run) }
+    utterance.onerror = (e) => {
+      if (run !== runIdRef.current) return
+      if (e.error === 'canceled' || e.error === 'interrupted') return
+      setError('Could not play audio. Please try again.')
+      setListenStatus('idle')
+    }
+    try { synth.speak(utterance) } catch {
+      setError('Could not play audio. Please try again.')
+      setListenStatus('idle')
+    }
+  }
+  const start = async () => {
+    if (!('speechSynthesis' in window)) { setError('Listen is not available in this browser.'); return }
+    const synth = window.speechSynthesis
+    const run = runIdRef.current + 1
+    runIdRef.current = run
+    try { synth.cancel() } catch { /* ignore */ }
+    setError('')
+    setListenStatus('playing')
+    try {
+      await waitForVoices(synth)
+      if (run !== runIdRef.current) return
+      const chunks = splitSpeechChunks(title + '. ' + text)
+      if (chunks.length === 0) { setListenStatus('idle'); return }
+      chunksRef.current = chunks
+      chunkIndexRef.current = 0
+      speakChunk(0, run)
+    } catch {
+      if (run !== runIdRef.current) return
+      setError('Could not play audio. Please try again.')
+      setListenStatus('idle')
+    }
   }
   const pause = () => {
-    window.speechSynthesis.pause()
-    setStatus('paused')
+    try { window.speechSynthesis.pause() } catch { /* ignore */ }
+    setListenStatus('paused')
   }
   const resume = () => {
-    window.speechSynthesis.resume()
-    setStatus('playing')
+    try { window.speechSynthesis.resume() } catch { /* ignore */ }
+    setListenStatus('playing')
+    window.setTimeout(() => {
+      if (runIdRef.current && statusRef.current === 'playing' && !window.speechSynthesis.speaking && chunksRef.current.length > 0) {
+        speakChunk(chunkIndexRef.current, runIdRef.current)
+      }
+    }, 100)
   }
-  if (!supported) return null
+  if (!supported) {
+    return (
+      <span data-testid="listen-control" className="inline-flex shrink-0 items-center gap-1.5">
+        <button type="button" disabled aria-label="Listen is not available in this browser" title="Listen is not available in this browser" className={iconButtonClass}>
+          <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg>
+        </button>
+        <span role="alert" className="text-xs font-bold text-[#C8102E] dark:text-[#FF6B81]">Audio unavailable</span>
+      </span>
+    )
+  }
   return (
-    <span data-testid="listen-control" className="inline-flex flex-wrap items-center gap-2">
+    <span data-testid="listen-control" className="inline-flex shrink-0 items-center gap-1.5">
       {status === 'idle' ? (
-        <button type="button" data-testid="listen-button" onClick={start} className="rounded-full border border-[#0F2A44]/20 bg-white px-3 py-1 text-sm font-bold text-[#0F2A44] hover:border-[#C8102E] hover:text-[#C8102E] dark:border-[#24405E] dark:bg-[#122840] dark:text-slate-100 dark:hover:border-[#C8102E] dark:hover:text-white">Listen</button>
+        <span className="inline-flex items-center gap-1.5">
+          <button type="button" data-testid="listen-button" onClick={start} aria-label="Listen to this article" title="Listen" className={iconButtonClass}>
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg>
+          </button>
+          {error && <span role="alert" className="text-xs font-bold text-[#C8102E] dark:text-[#FF6B81]">{error}</span>}
+        </span>
       ) : (
-        <span className="inline-flex flex-wrap items-center gap-2">
-          <span className="text-sm font-bold text-[#0F2A44] dark:text-slate-100" role="status">{status === 'paused' ? 'Paused' : 'Listening...'}</span>
+        <span className="inline-flex items-center gap-1">
+          <span className="text-xs font-bold text-[#0F2A44] dark:text-slate-100" role="status">{status === 'paused' ? 'Paused' : 'Listening...'}</span>
           {status === 'playing' ? (
-            <button type="button" data-testid="listen-pause" onClick={pause} className="rounded-full border border-[#0F2A44]/20 bg-white px-3 py-1 text-sm font-bold text-[#0F2A44] hover:border-[#C8102E] hover:text-[#C8102E] dark:border-[#24405E] dark:bg-[#122840] dark:text-slate-100 dark:hover:border-[#C8102E] dark:hover:text-white">Pause</button>
+            <button type="button" data-testid="listen-pause" onClick={pause} aria-label="Pause" title="Pause" className={iconButtonClass}>
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1" /><rect x="14" y="5" width="4" height="14" rx="1" /></svg>
+            </button>
           ) : (
-            <button type="button" data-testid="listen-resume" onClick={resume} className="rounded-full border border-[#0F2A44]/20 bg-white px-3 py-1 text-sm font-bold text-[#0F2A44] hover:border-[#C8102E] hover:text-[#C8102E] dark:border-[#24405E] dark:bg-[#122840] dark:text-slate-100 dark:hover:border-[#C8102E] dark:hover:text-white">Resume</button>
+            <button type="button" data-testid="listen-resume" onClick={resume} aria-label="Resume" title="Resume" className={iconButtonClass}>
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg>
+            </button>
           )}
-          <button type="button" data-testid="listen-stop" onClick={stop} className="rounded-full bg-[#C8102E] px-3 py-1 text-sm font-bold text-white hover:bg-[#A50D26]">Stop</button>
+          <button type="button" data-testid="listen-stop" onClick={stop} aria-label="Stop listening" title="Stop" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#C8102E] text-white hover:bg-[#A50D26]">
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="1" /></svg>
+          </button>
         </span>
       )}
     </span>
