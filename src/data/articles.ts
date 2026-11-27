@@ -1,6 +1,7 @@
-export interface Article { slug: string; title: string; description: string; category: string; date: string; author: string; excerpt: string; content: string[]; cover?: string; status?: string }
+export interface Article { slug: string; id?: number; title: string; description: string; category: string; date: string; author: string; excerpt: string; content: string[]; cover?: string; status?: string }
 export const ARTICLES: Article[] = [
   {
+    id: 1,
     slug: 'how-to-make-money-fast-in-gta-6',
     title: 'How to Make Money Fast in GTA 6: Best Early Methods',
     description: 'Learn how to make money fast in GTA 6 with early game jobs, side work, and smart spending habits that help new players in Leonida.',
@@ -34,6 +35,7 @@ export const ARTICLES: Article[] = [
     ],
   },
   {
+    id: 2,
     slug: 'how-to-speed-up-a-slow-laptop-in-10-minutes',
     title: 'How to Speed Up a Slow Laptop in 10 Minutes',
     description: 'How to speed up a slow laptop in 10 minutes: close extra programs, clear startup apps, free space, and restart the right way.',
@@ -68,6 +70,7 @@ export const ARTICLES: Article[] = [
     ],
   },
   {
+    id: 3,
     slug: 'how-to-make-a-monthly-budget-you-can-actually-stick-to',
     title: 'How to Make a Monthly Budget You Can Actually Stick To',
     description: 'How to make a monthly budget you can actually stick to: track income, set simple limits, pay yourself first, and review weekly.',
