@@ -183,7 +183,7 @@ function Home() {
   useSeo('Home', 'The Newsroom Daily brings clear, practical guides on gaming, tech how-to, money and finance, career and work, and everyday life.')
   const featured = articles.find((a) => a.is_featured)
   const latest = featured ?? articles[0]
-  const visible = articles.filter((a) => isDuePublished(a.status, a.scheduled_at)); const nextTwo = visible.filter((a) => a.slug !== latest?.slug).slice(0, 2); const feature = visible.find((a) => a.slug !== latest?.slug && a.cover && !nextTwo.some((n) => n.slug === a.slug))
+  const visible = articles.filter((a) => isDuePublished(a.status, a.scheduled_at)); const featureExclusions = visible.filter((a) => a.slug !== latest?.slug).slice(0, 2); const feature = visible.find((a) => a.slug !== latest?.slug && a.cover && !featureExclusions.some((n) => n.slug === a.slug))
   const shownCategories = CATEGORIES.filter((c) => homeCategories.includes(c.slug))
   return (
     <div>
@@ -196,7 +196,7 @@ function Home() {
             <h1 className="text-4xl md:text-[40px] font-black mt-2 leading-tight"><Link to={articleUrl(latest)} className="hover:text-[#C8102E] hover:underline">{latest.title}</Link></h1>
             <p className="text-[#6B7280] mt-3 line-clamp-2">{latest.excerpt}</p>
             <p className="text-sm text-[#6B7280] mt-3">{latest.date} | The Newsroom Daily</p>
-            <Link to={articleUrl(latest)} className="inline-block mt-4 bg-[#C8102E] text-white font-bold px-4 py-2 rounded hover:bg-[#A50D26]">Read the guide &rarr;</Link></div></div><div className="md:col-span-2 flex flex-col gap-6 md:gap-8 md:border-l md:border-gray-200 md:dark:border-[#24405E] md:pl-6">{nextTwo.map((a) => (<article key={a.slug} className="flex gap-4 items-start border-b border-gray-200 dark:border-[#24405E] pb-6 last:border-b-0 last:pb-0"><div className="min-w-0 flex-1"><p className="text-xs font-bold tracking-widest text-[#C8102E]">{(categoryBySlug(a.category)?.name ?? a.category).toUpperCase()}</p><h2 className="text-lg font-bold leading-snug mt-1"><Link to={articleUrl(a)} className="hover:text-[#C8102E] hover:underline">{a.title}</Link></h2><p className="text-sm text-[#6B7280] mt-1 line-clamp-1">{a.excerpt}</p></div>{a.cover && (<Link to={articleUrl(a)} className="shrink-0"><img src={a.cover} alt={a.cover_alt || a.title} className="w-24 h-24 md:w-28 md:h-28 object-cover" /></Link>)}</article>))}<MostReadList articles={visible} compact /></div></div></section>
+            <Link to={articleUrl(latest)} className="inline-block mt-4 bg-[#C8102E] text-white font-bold px-4 py-2 rounded hover:bg-[#A50D26]">Read the guide &rarr;</Link></div></div><div className="md:col-span-2 flex flex-col md:border-l md:border-gray-200 md:dark:border-[#24405E] md:pl-6"><MostReadList articles={visible} compact /></div></div></section>
       )}
       
       <div className="mb-4"><h2 className="text-lg font-bold uppercase tracking-wide text-[#0F2A44] dark:text-slate-100">Latest articles</h2><div className="mt-2 h-[3px] w-10 bg-[#C8102E]" /></div>
