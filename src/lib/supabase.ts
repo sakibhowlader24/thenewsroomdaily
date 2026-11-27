@@ -28,7 +28,7 @@ export interface ArticleRow {
   views: number | null
   deleted_at: string | null
   scheduled_at: string | null
-  cover_alt: string | null
+  cover_alt: string | null; corrected_at: string | null
 }
 
 // Public article shape: the seed Article plus the Phase 2 fields the site shows.
@@ -38,7 +38,7 @@ export type PublicArticle = Article & {
   views: number
   scheduled_at?: string
   deleted_at?: string | null
-  cover_alt?: string
+  cover_alt?: string; corrected_at?: string
 }
 
 // An article is visible on the public site when it is Published, or Scheduled
@@ -104,6 +104,7 @@ export function rowToArticle(row: ArticleRow): PublicArticle {
     scheduled_at: row.scheduled_at || undefined,
     deleted_at: row.deleted_at,
     cover_alt: row.cover_alt || undefined,
+    corrected_at: row.corrected_at || undefined,
   }
 }
 
@@ -123,6 +124,7 @@ export function articleToRow(a: PublicArticle): Omit<ArticleRow, 'id'> {
     deleted_at: a.deleted_at ?? null,
     scheduled_at: a.scheduled_at ?? null,
     cover_alt: a.cover_alt ?? null,
+    corrected_at: a.corrected_at ?? null,
   }
 }
 
@@ -278,4 +280,59 @@ export async function fetchArticleFeedbackCounts(articleId: number): Promise<{ h
 export async function fetchMostReadArticles(limit = 5): Promise<PublicArticle[]> {
   const list = await fetchPublishedArticles()
   return [...list].sort((a, b) => (b.views ?? 0) - (a.views ?? 0)).slice(0, limit)
+}
+
+// ---- Article corrections (moderated) ----
+// Readers can only suggest a correction. Nothing they submit changes an
+// article directly; the owner reviews every suggestion in /admin.
+export interface ArticleCorrection {
+  id: number
+  article_id: number
+  wrong_text: string
+  correction: string
+  source_url: string
+  name: string | null
+  email: string | null
+  status: string
+  created_at: string
+}
+export interface CorrectionInput {
+  article_id: number
+  wrong_text: string
+  correction: string
+  source_url: string
+  name?: string
+  email?: string
+}
+export async function submitArticleCorrection(input: CorrectionInput): Promise<{ ok: boolean; error?: string }> {
+  if (!supabase) return { ok: false, error: 'Correction reports are not available right now.' }
+  const { error } = await supabase.from('article_corrections').insert({ article_id: input.article_id, wrong_text: input.wrong_text.trim(), correction: input.correction.trim(), source_url: input.source_url.trim(), name: input.name?.trim() || null, email: input.email?.trim() || null })
+  if (error) return { ok: false, error: error.message }
+  return { ok: true }
+}
+export async function fetchArticleCorrections(): Promise<ArticleCorrection[]> {
+  if (!supabase) return []
+  const { data, error } = await supabase.rpc('list_article_corrections')
+  if (!error && data) return data as ArticleCorrection[]
+  const fallback = await supabase.from('article_corrections').select('*').order('created_at', { ascending: false })
+  if (fallback.error || !fallback.data) return []
+  const list = fallback.data as ArticleCorrection[]
+  return [...list].sort((x, y) => (x.status === 'pending' ? 0 : 1) - (y.status === 'pending' ? 0 : 1) || (y.created_at || '').localeCompare(x.created_at || ''))
+}
+export async function reviewArticleCorrection(correction: ArticleCorrection, status: 'approved' | 'rejected'): Promise<boolean> {
+  if (!supabase) return false
+  const { error } = await supabase.rpc('review_article_correction', { p_id: correction.id, p_status: status })
+  if (!error) return true
+  const { error: updateError } = await supabase.from('article_corrections').update({ status }).eq('id', correction.id)
+  if (updateError) return false
+  if (status === 'approved') {
+    const today = new Date().toISOString().slice(0, 10)
+    await supabase.from('articles').update({ corrected_at: today }).eq('id', correction.article_id)
+  }
+  return true
+}
+export async function deleteArticleCorrection(id: number): Promise<boolean> {
+  if (!supabase) return false
+  const { error } = await supabase.from('article_corrections').delete().eq('id', id)
+  return !error
 }
