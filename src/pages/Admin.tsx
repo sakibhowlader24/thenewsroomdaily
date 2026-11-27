@@ -8,6 +8,7 @@ import {
   articleUrl,
   rowToArticle,
   articleToRow,
+  displayDateToIso,
   fetchRevisions,
   saveRevision,
   fetchHomepageCategories,
@@ -228,7 +229,7 @@ export default function Admin() {
     setBody(a.content.join('\n\n'))
     setCover(a.cover || '')
     setCoverAlt(a.cover_alt || '')
-    setPubDate(a.date || new Date().toISOString().slice(0, 10))
+    setPubDate(displayDateToIso(a.date) || new Date().toISOString().slice(0, 10))
     setScheduledAt(a.scheduled_at ? a.scheduled_at.slice(0, 16) : '')
     setIsFeatured(a.is_featured)
     setStatus(a.status || 'published')
