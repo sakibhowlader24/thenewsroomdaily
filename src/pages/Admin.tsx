@@ -12,7 +12,7 @@ import {
   fetchRevisions,
   saveRevision,
   fetchHomepageCategories,
-  fetchArticleCorrections,
+  fetchArticleCorrections, fetchNewsletterSubscribers, formatUsDate,
   reviewArticleCorrection,
   deleteArticleCorrection,
   saveHomepageCategories,
@@ -20,7 +20,7 @@ import {
   type ArticleRow,
   type ArticleRevision,
   type PublicArticle,
-  type ArticleCorrection,
+  type ArticleCorrection, type NewsletterSubscriber,
 } from '../lib/supabase'
 import { formatBytes, uploadCoverImage } from '../lib/image'
 import { countWords, useSeo } from '../App'
@@ -104,7 +104,7 @@ export default function Admin() {
   const [uploadError, setUploadError] = useState('')
   const [homeCategories, setHomeCategories] = useState<string[]>(ALL_CATEGORY_SLUGS)
   const [settingsMsg, setSettingsMsg] = useState('')
-  const [corrections, setCorrections] = useState<ArticleCorrection[]>([])
+  const [corrections, setCorrections] = useState<ArticleCorrection[]>([]); const [subscribers, setSubscribers] = useState<NewsletterSubscriber[]>([])
   const [correctionsMsg, setCorrectionsMsg] = useState('')
   const [restoreMsg, setRestoreMsg] = useState('')
   const [view, setView] = useState<'articles' | 'trash'>('articles')
@@ -137,7 +137,7 @@ export default function Admin() {
     const list = await fetchAllArticles()
     setRows(list)
     setHomeCategories(await fetchHomepageCategories())
-    setCorrections(await fetchArticleCorrections())
+    setCorrections(await fetchArticleCorrections()); setSubscribers(await fetchNewsletterSubscribers())
     setLoading(false)
   }
   useEffect(() => { if (user) load() }, [user])
@@ -340,7 +340,7 @@ export default function Admin() {
     setRows(await fetchAllArticles())
     setCorrectionsMsg(status === 'approved' ? 'Correction approved. The article now shows a Corrected date.' : 'Correction rejected.')
   }
-  const removeCorrection = async (c: ArticleCorrection) => {
+  const downloadSubscribersCsv = () => { const header = 'email,subscribed date'; const lines = subscribers.map((s) => s.email + ',"' + formatUsDate(s.created_at) + '"'); const csv = [header, ...lines].join(String.fromCharCode(10)); const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'newsletter-subscribers.csv'; a.click(); URL.revokeObjectURL(url) } const removeCorrection = async (c: ArticleCorrection) => {
     if (!window.confirm('Delete this correction report?')) return
     const ok = await deleteArticleCorrection(c.id)
     if (!ok) { setCorrectionsMsg('Could not delete that correction.'); return }
@@ -624,7 +624,7 @@ export default function Admin() {
           </ul>
         )}
       </section>
-      <div className="flex gap-2 mt-8">
+      <section id="admin-subscribers" data-testid="admin-subscribers" className="bg-white border rounded-lg p-6 shadow-sm mt-8 dark:bg-[#122840] dark:border-[#24405E]"><h2 className="text-xl font-black">Subscribers</h2><p className="text-sm text-[#6B7280] dark:text-slate-400 mt-1">Newsletter subscribers, newest first.</p><p className="mt-3 text-sm font-bold text-[#0F2A44] dark:text-slate-100">Total subscribers: {subscribers.length}</p><button type="button" onClick={downloadSubscribersCsv} disabled={subscribers.length === 0} className="mt-3 rounded bg-[#C8102E] px-3 py-1 text-sm font-bold text-white hover:bg-[#A50D26] disabled:opacity-50">Download CSV</button>{subscribers.length === 0 ? (<p className="mt-3 text-sm text-[#6B7280] dark:text-slate-400">No subscribers yet.</p>) : (<ul className="mt-3 space-y-3">{subscribers.map((s) => (<li key={s.email} className="rounded border border-gray-200 p-4 dark:border-[#24405E]"><p className="font-bold">{s.email}</p><p className="mt-1 text-sm text-[#6B7280] dark:text-slate-400">Subscribed: {formatUsDate(s.created_at)}</p></li>))}</ul>)}</section><div className="flex gap-2 mt-8">
         <button onClick={() => setView('articles')} className={view === 'articles' ? 'bg-[#0F2A44] text-white font-bold px-4 py-2 rounded' : 'border rounded px-4 py-2'}>Articles ({active.length})</button>
         <button onClick={() => setView('trash')} className={view === 'trash' ? 'bg-[#0F2A44] text-white font-bold px-4 py-2 rounded' : 'border rounded px-4 py-2'}>Trash ({trashed.length})</button>
       </div>
