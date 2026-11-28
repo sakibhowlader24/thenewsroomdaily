@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ARTICLES } from '../data/articles'
 import { SITE_URL, categoryBySlug } from '../data/site'
@@ -173,6 +173,38 @@ export function ReadingProgressBar() {
       <div className="h-full bg-[#C8102E]" style={{ width: progress + '%' }} data-testid="reading-progress" />
     </div>
   )
+}
+
+// ---- Rich text: turn markdown links, legacy "(link to URL)" notes and bare URLs in article body blocks into clickable links. Same-site URLs become internal <Link> so a future domain change never breaks them. ----
+export function renderRichText(block: string): ReactNode[] {
+  const pattern = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)|\(link to (https?:\/\/[^\s)]+)\)|(https?:\/\/[^\s)]+)/g
+  const nodes: ReactNode[] = []
+  let last = 0
+  let key = 0
+  let m: RegExpExecArray | null
+  while ((m = pattern.exec(block)) !== null) {
+    if (m.index > last) nodes.push(block.slice(last, m.index))
+    let url = m[2] || m[3] || m[4] || ''
+    const label = m[1] || url
+    let trail = ''
+    const trailMatch = url.match(/[.,;:!?]+$/)
+    if (trailMatch && !m[1]) { trail = trailMatch[0]; url = url.slice(0, -trail.length) }
+    nodes.push(renderRichLink(url, label, key++))
+    if (trail) nodes.push(trail)
+    last = m.index + m[0].length
+  }
+  if (last < block.length) nodes.push(block.slice(last))
+  return nodes
+}
+
+function renderRichLink(url: string, label: string, key: number) {
+  const site = SITE_URL.replace(/\/$/, '')
+  const cls = 'text-[#C8102E] underline'
+  if (url.startsWith(site)) {
+    const path = url.slice(site.length) || '/'
+    return (<Link key={key} to={path} className={cls}>{label}</Link>)
+  }
+  return (<a key={key} href={url} target="_blank" rel="noopener noreferrer" className={cls}>{label}</a>)
 }
 
 // ---- Table of contents: built from the article's own structure. ----
