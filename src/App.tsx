@@ -11,7 +11,7 @@ import {
   ALL_CATEGORY_SLUGS,
   type PublicArticle,
 } from './lib/supabase'
-import { SearchBox, ShareButtons, ReadingProgressBar, BookmarkButton, useBookmarks, buildToc, blockAnchorId, searchArticles } from './lib/reader'
+import { SearchBox, ShareButtons, ReadingProgressBar, BookmarkButton, useBookmarks, buildToc, blockAnchorId, searchArticles, renderRichText } from './lib/reader'
 import { FontSizeControl, ListenControl, PrintButton, ArticleFeedback, ReportCorrectionForm, NewsletterForm, MostReadList, getSavedFontSize, ARTICLE_FONT_SIZE_PX, FONT_SIZE_KEY, type ArticleFontSize } from './lib/reader-features'
 const Admin = lazy(() => import('./pages/Admin'))
 
@@ -352,7 +352,7 @@ function ArticlePage() {
       <div data-testid="article-body" data-font-size={fontSize} style={{ fontSize: ARTICLE_FONT_SIZE_PX[fontSize] }} className="mt-6 space-y-4 leading-relaxed bg-white border rounded-lg p-6 shadow-sm dark:bg-[#122840] dark:border-[#24405E]">
         {a.content.map((block, i) => {
           if (block.startsWith('## ')) return <h2 key={i} id={blockAnchorId(a.content, i)} className="text-2xl font-bold mt-2 scroll-mt-24">{block.slice(3)}</h2>
-          return <p key={i} id={blockAnchorId(a.content, i)} className="scroll-mt-24">{block}</p>
+          return <p key={i} id={blockAnchorId(a.content, i)} className="scroll-mt-24">{renderRichText(block)}</p>
         })}
       </div>
       {a.corrected_at && <p data-testid="article-corrected" className="mt-3 text-sm text-[#6B7280] dark:text-slate-400">Corrected: {formatUsDate(a.corrected_at)}</p>}
